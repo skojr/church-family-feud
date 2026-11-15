@@ -1,0 +1,82 @@
+@import '@fontsource/anton/400.css';
+@import '@fontsource/montserrat/600.css';
+@import '@fontsource/montserrat/800.css';
+
+:root {
+  --navy-950: #030726;
+  --navy-900: #071047;
+  --royal-800: #0b2a9e;
+  --royal-600: #1745d6;
+  --royal-500: #2a62ff;
+  --sky-300: #8fb8ff;
+  --purple-700: #4a1a9e;
+  --purple-500: #7a3cf0;
+  --orange-500: #ff7a18;
+  --orange-400: #ff9a3c;
+  --gold-300: #ffd27a;
+
+  --chrome: linear-gradient(
+    180deg,
+    #ffffff 0%,
+    #cfd6e4 18%,
+    #8a94a8 45%,
+    #3a404d 52%,
+    #9aa3b5 70%,
+    #eef1f7 100%
+  );
+
+  --font-display: 'Anton', Impact, 'Arial Narrow Bold', sans-serif;
+  --font-body: 'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  color-scheme: dark;
+  font-family: var(--font-body);
+  color: #fff;
+  background: var(--navy-950);
+  -webkit-font-smoothing: antialiased;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  margin: 0;
+  height: 100%;
+}
+
+body {
+  overflow: hidden;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: default;
+}
+
+:focus-visible {
+  outline: 3px solid var(--orange-400);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

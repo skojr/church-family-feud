@@ -1,0 +1,36 @@
+const SHORTCUTS = [
+  ['← / →', 'Previous / next round'],
+  ['1 – 6', 'Reveal that answer'],
+  ['Space', 'Reveal next hidden answer'],
+  ['A', 'Reveal all answers'],
+  ['H', 'Hide all answers'],
+  ['R', 'Reset round (answers + strikes)'],
+  ['X', 'Strike (wrong answer)'],
+  ['F', 'Toggle fullscreen'],
+  ['E', 'Toggle host edit mode'],
+  ['M', 'Mute / unmute sound'],
+  ['?', 'Show / hide this help'],
+]
+
+export default function HelpOverlay({ onClose }) {
+  return (
+    <div className="help" onClick={onClose}>
+      <div className="help__card" onClick={(e) => e.stopPropagation()}>
+        <h2>Keyboard Shortcuts</h2>
+        <dl>
+          {SHORTCUTS.map(([key, desc]) => (
+            <div key={key}>
+              <dt>
+                <kbd>{key}</kbd>
+              </dt>
+              <dd>{desc}</dd>
+            </div>
+          ))}
+        </dl>
+        <button type="button" className="editor__btn" onClick={onClose}>
+          Got it
+        </button>
+      </div>
+    </div>
+  )
+}
