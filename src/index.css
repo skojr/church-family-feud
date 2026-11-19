@@ -16,6 +16,12 @@
   --white-soft: rgba(255, 255, 255, 0.72); /* secondary labels */
   --strike-red: #ff2727;
 
+  --soft: rgba(255, 255, 255, 0.75);
+
+  /* Panel rims for the board: coral for frames, lighter violet for answer bars */
+  --rim: linear-gradient(180deg, #ffa294 0%, var(--coral) 45%, #c9466e 100%);
+  --rim-soft: linear-gradient(180deg, #b18aff 0%, #7a4ae0 50%, #4a1fa8 100%);
+
   /* Bevelled border used around panels (paint as `border-box` under a `padding-box` fill). */
   --frame: linear-gradient(
     180deg,
@@ -76,7 +82,7 @@ button:disabled {
 }
 
 :focus-visible {
-  outline: 3px solid var(--violet-glow);
+  outline: 3px solid var(--coral);
   outline-offset: 3px;
 }
 

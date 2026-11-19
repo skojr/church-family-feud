@@ -5,7 +5,10 @@ Step-by-step instructions for getting the game running on a laptop, and then con
 - [Part 1: Get the game running on the laptop](#part-1-get-the-game-running-on-the-laptop)
 - [Part 2: Expose the game so a phone can reach it](#part-2-expose-the-game-so-a-phone-can-reach-it)
 - [Part 3: Control the game from the phone](#part-3-control-the-game-from-the-phone)
+- [Part 4: Buzzers, LED screens and cues](#part-4-buzzers-led-screens-and-cues)
 - [Troubleshooting](#troubleshooting)
+
+All the addresses (board, host view, buzzer hub, LED screens) are listed in one table in the README: [All the links](README.md#all-the-links).
 
 ---
 
@@ -150,6 +153,59 @@ Everything you do on either device shows up on the other straight away. The lapt
 
 ---
 
+## Part 4: Buzzers, LED screens and cues
+
+This part is only needed if you're using the buzzers, the LED wall screens or OSC cues. They run in a second small program, the **buzzer hub**, alongside the game.
+
+### 1. Start the hub
+
+Open a **second** terminal window (leave the game running in the first), go to the game folder, then:
+
+```bash
+cd buzzer-hub
+npm install
+npm start
+```
+
+`npm install` is only needed the first time. The hub prints its addresses:
+
+```
+  Bell screen   http://localhost:8090
+  Simulator     http://localhost:8090/sim
+  Control       http://localhost:8090/control   (LED screens and buzzers)
+  LED banner    http://localhost:8090/banner
+  LED small     http://localhost:8090/small
+  On network    http://192.168.1.23:8090   (stations find this automatically)
+```
+
+The first time, macOS may ask whether `node` can accept incoming connections. Click **Allow**.
+
+### 2. Check the buzzers
+
+Open http://localhost:8090. Power the two buzzer stations; within about 10 seconds both show **Online**. Press each one: the screen shows who buzzed first, and on the game board that team becomes the **Answering** team. Press **Reset & arm** (or Space) to arm them again.
+
+No buzzers yet? Open http://localhost:8090/sim and press **A** or **B** on the keyboard.
+
+### 3. Open the LED screens
+
+Use the buttons along the bottom of the hub page, or the links in [All the links](README.md#all-the-links). Open each LED page in its own browser window, set the window to the LED canvas size (or crop in Resolume), and screen-capture it into Resolume. Everything resizes to fit, from one 128×128 panel to a long strip.
+
+If Resolume runs on a different computer, open the pages there using the laptop's **On network** address instead of `localhost`.
+
+### 4. Optional: OSC cues
+
+To fire cues in QLab, Resolume, Companion or a lighting desk, put the receiving app's IP and port in `buzzer-hub/osc.config.json` (the hub creates it the first time it starts) and save. Open http://localhost:8090/api/osc/test to send a test message. The full list of cues is in [buzzer-hub/README.md](buzzer-hub/README.md#osc-output-cues-for-other-apps).
+
+### Order on the day
+
+1. Start the game (`npm run host` if the host uses a phone, otherwise `npm run dev`).
+2. Start the hub (`npm start` in `buzzer-hub`).
+3. Open the board on the projector, the host view on the phone, and the LED pages for Resolume.
+
+The game finds the hub by itself, in any order. If the hub is restarted, the LED screens catch up within a few seconds.
+
+---
+
 ## Troubleshooting
 
 **The phone says the connection timed out or the page won't load**
@@ -168,6 +224,14 @@ Wait a few seconds; it catches up automatically. If it doesn't, check the laptop
 **The banner says Not synced (run npm run host)**
 
 The game is being served as a production build (for example `npm run preview`) instead of `npm run host`. Phone control only works with `npm run host`.
+
+**The LED screens show 0 or old team names**
+
+The game sends the team names and scores to the hub. Check the board is open in a browser (it's the board page that reports to the hub) and the hub is running. If the hub was started before an update, stop it with Ctrl + C and run `npm start` again.
+
+**A buzzer stays Offline**
+
+Check it has power and is on the same network as the laptop. If the network blocks discovery, type the hub's **On network** address (for example `192.168.1.23:8090`) in the station's setup page. See [buzzer-hub/README.md](buzzer-hub/README.md).
 
 **Starting completely fresh**
 

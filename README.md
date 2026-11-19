@@ -101,6 +101,8 @@ npm run host    # laptop + phone control
 - [ ] Press **R** on any round you tested so it starts out hidden.
 - [ ] Enter the team names and click **Reset team scores** in Host Edit mode so both teams start at 0.
 - [ ] If you're hosting from a phone: at the venue, run `npm run host`, open the host page on the phone, and check that revealing an answer on the phone shows up on the projector (see the [Setup Guide](setup.md#part-3-control-the-game-from-the-phone)).
+- [ ] If you're using the buzzers or LED screens: start the hub (`npm start` in `buzzer-hub`), check both buzzers show **Online** on the hub page, and press each one once to test (see the [Setup Guide](setup.md#part-4-buzzers-led-screens-and-cues)).
+- [ ] Open the LED pages in the browser Resolume captures and size each window to its LED canvas. Check that the team names on the banner match the board.
 - [ ] Turn off laptop sleep and keep the laptop plugged in.
 - [ ] For a full run-through of every screen and control, work through the [UI test plan](docs/test-plan.md).
 
@@ -115,6 +117,30 @@ The game always draws a 16:9 board and scales it to fit the screen, so it looks 
 
 ---
 
+## All the links
+
+Two programs run on the show laptop: **the game** (port 5173) and **the buzzer hub** (port 8090). Start both (see [Part 4 of the Setup Guide](setup.md#part-4-buzzers-led-screens-and-cues)).
+
+On the laptop itself, use `localhost`. From any other device on the same network (a phone, the Resolume computer), replace `localhost` with the laptop's network address, shown as **Network** when the game starts and **On network** when the hub starts (for example `192.168.0.21`).
+
+| Screen | On the laptop | From another device | Used for |
+| --- | --- | --- | --- |
+| **Game board** | http://localhost:5173 | `http://<laptop-ip>:5173` | The projector. Press **F** for fullscreen. |
+| **Host view** | http://localhost:5173/?view=host | `http://<laptop-ip>:5173/?view=host` | The host's phone: answers, votes, team names, strikes. From a phone, the game must be started with `npm run host`. |
+| **Buzzer hub** | http://localhost:8090 | `http://<laptop-ip>:8090` | Buzzer status, reset/lock, links to everything below. |
+| **LED control** | http://localhost:8090/control | `http://<laptop-ip>:8090/control` | Team scores and buzzer state at a glance, buzzer reset/lock, LED links. |
+| **LED banner** | http://localhost:8090/banner | `http://<laptop-ip>:8090/banner` | Long LED banner: team names and total points. |
+| **LED small** | http://localhost:8090/small | `http://<laptop-ip>:8090/small` | Small LED screen: both teams' points and who buzzed first. |
+| **LED small, Team 1 only** | http://localhost:8090/small?team=A | `http://<laptop-ip>:8090/small?team=A` | One team's podium screen. |
+| **LED small, Team 2 only** | http://localhost:8090/small?team=B | `http://<laptop-ip>:8090/small?team=B` | One team's podium screen. |
+| **Buzzer simulator** | http://localhost:8090/sim | `http://<laptop-ip>:8090/sim` | Test without the real buzzers. |
+
+- Add `?bg=black` to any LED link (or `&bg=black` when it already has a `?`, like `/small?team=A&bg=black`) for a pure black background to key in Resolume.
+- Team names and scores always come from the game. Change them in **Host Edit** on the board (press **E**) or the host view's **Edit votes & teams** tab; the LED screens follow by themselves.
+- Buzzer A is Team 1 and buzzer B is Team 2. Whoever buzzes first becomes the answering team on the board.
+
+---
+
 ## Buzzers, LED screens and OSC cues
 
 The `buzzer-hub` folder is a separate small program for the extras. Run it alongside the game:
@@ -126,7 +152,7 @@ npm start
 ```
 
 - **Buzzers:** two ESP32 buzzer stations. The first team to buzz becomes the answering team on the board automatically.
-- **LED screens for Resolume:** a long banner with team names and scores, and a small "who buzzed first" screen, at `http://localhost:8090/control`.
+- **LED screens for Resolume:** a long banner with team names and scores, and a small "who buzzed first" screen. See [All the links](#all-the-links).
 - **OSC cues** to QLab, Resolume, Companion and similar apps on every reveal, strike, round change and buzz.
 
 Setup, wiring and the full OSC list are in [buzzer-hub/README.md](buzzer-hub/README.md).

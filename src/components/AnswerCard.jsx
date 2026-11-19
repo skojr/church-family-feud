@@ -1,3 +1,5 @@
+import IcgcLogo from './IcgcLogo'
+
 export default function AnswerCard({ number, answer, revealed, onToggle }) {
   const empty = !answer.text.trim()
   const classes = ['answer', revealed && !empty && 'is-revealed', empty && 'is-empty']
@@ -20,7 +22,7 @@ export default function AnswerCard({ number, answer, revealed, onToggle }) {
             {!empty && <span className="badge">{number}</span>}
           </span>
           <span className="answer__panel answer__panel--hidden">
-            {!empty && <span className="answer__watermark">The Gathering ’26</span>}
+            {!empty && <IcgcLogo className="answer__watermark" />}
           </span>
         </span>
 
