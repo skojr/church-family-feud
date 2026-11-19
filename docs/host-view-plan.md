@@ -1,6 +1,6 @@
 # Plan: Hidden Host View
 
-**Status:** Not started
+**Status:** Replaced. Host Mode was built as a phone page (`/?view=host`) that syncs through the Vite dev server over local Wi-Fi rather than `localStorage` storage events, so it works from a phone and from a second window on the laptop. See "Running the game from your phone (Host Mode)" in the main [README](../README.md) and the `feud-sync` plugin in `vite.config.js`. The notes below are kept for history.
 
 ## Goal
 

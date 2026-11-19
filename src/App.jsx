@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react'
-import defaultRounds, { isValidRounds, sortByVotes } from './data/rounds'
-import { useLocalStorage } from './hooks/useLocalStorage'
+import { useEffect, useRef, useState } from 'react'
+import { useGame } from './hooks/useGame'
 import { useFullscreen } from './hooks/useFullscreen'
 import { playReveal, playStrike } from './lib/sounds'
 import Brand from './components/Brand'
@@ -12,143 +11,30 @@ import StrikeOverlay from './components/StrikeOverlay'
 import TeamPanel from './components/TeamPanel'
 import './App.css'
 
-const cloneDefaults = () => structuredClone(defaultRounds)
-const isPlainObject = (v) => v !== null && typeof v === 'object' && !Array.isArray(v)
-
-const defaultTeams = () => [
-  { name: 'Team 1', bonus: 0 },
-  { name: 'Team 2', bonus: 0 },
-]
-const isValidTeams = (v) =>
-  Array.isArray(v) &&
-  v.length === 2 &&
-  v.every((t) => isPlainObject(t) && typeof t.name === 'string' && Number.isFinite(t.bonus))
-
-// Points a round has earned each team: revealed answers credited to the team that was answering.
-const roundTeamPoints = (round, state) => {
-  const points = [0, 0]
-  const revealed = new Set(state?.revealed ?? [])
-  const awarded = state?.awarded ?? {}
-  for (const a of round.answers) {
-    const team = awarded[a.id]
-    if (a.text.trim() && revealed.has(a.id) && (team === 0 || team === 1)) {
-      points[team] += Number(a.votes) || 0
-    }
-  }
-  return points
-}
-
 export default function App() {
-  const [rounds, setRounds] = useLocalStorage('igc-feud:rounds', cloneDefaults, isValidRounds)
-  const [storedIndex, setRoundIndex] = useLocalStorage('igc-feud:round', 0)
-  // { [roundId]: { revealed: number[], strikes: number, awarded: { [answerId]: teamIndex } } }
-  const [roundState, setRoundState] = useLocalStorage('igc-feud:state', {}, isPlainObject)
-  const [soundOn, setSoundOn] = useLocalStorage('igc-feud:sound', true)
-  // `bonus` holds manual adjustments from Host Edit on top of the points earned from reveals.
-  const [teams, setTeams] = useLocalStorage('igc-feud:teams', defaultTeams, isValidTeams)
-  const [activeTeam, setActiveTeam] = useLocalStorage('igc-feud:active-team', 0, (v) => v === 0 || v === 1)
+  const game = useGame()
+  const { rounds, roundIndex, round, state, revealed, answers, soundOn } = game
   const [hostMode, setHostMode] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
-  const [strikeTick, setStrikeTick] = useState(0)
+  const [strikeFlash, setStrikeFlash] = useState(0)
   const [isFullscreen, toggleFullscreen] = useFullscreen()
 
-  const roundIndex = Math.min(Math.max(Number(storedIndex) || 0, 0), rounds.length - 1)
-  const round = rounds[roundIndex]
-  const state = roundState[round.id] ?? { revealed: [], strikes: 0 }
-  const revealed = new Set(state.revealed)
-  const answers = sortByVotes(round.answers)
-  const playable = answers.filter((a) => a.text.trim())
-  const roundPoints = roundTeamPoints(round, state)
-  const earnedTotals = rounds.reduce(
-    (sum, r) => {
-      const p = roundTeamPoints(r, roundState[r.id])
-      return [sum[0] + p[0], sum[1] + p[1]]
-    },
-    [0, 0],
-  )
-  const teamTotals = teams.map((t, i) => earnedTotals[i] + t.bonus)
-
-  const updateState = (patch) =>
-    setRoundState((prev) => {
-      const current = prev[round.id] ?? { revealed: [], strikes: 0 }
-      return { ...prev, [round.id]: { ...current, ...patch(current) } }
-    })
-
-  const reveal = (id) => {
-    const answer = round.answers.find((a) => a.id === id)
-    if (!answer?.text.trim() || revealed.has(id)) return
-    if (soundOn) playReveal()
-    updateState((s) => ({
-      revealed: [...s.revealed, id],
-      awarded: { ...s.awarded, [id]: activeTeam },
-    }))
-  }
-
-  const toggle = (id) => {
-    if (revealed.has(id)) {
-      updateState((s) => {
-        const awarded = { ...s.awarded }
-        delete awarded[id]
-        return { revealed: s.revealed.filter((r) => r !== id), awarded }
-      })
-    } else reveal(id)
-  }
-
-  const switchTeam = () => setActiveTeam((t) => (t === 0 ? 1 : 0))
-
-  const updateTeam = (i, patch) =>
-    setTeams((prev) => prev.map((t, j) => (j === i ? { ...t, ...patch } : t)))
-
-  const setTeamTotal = (i, total) => updateTeam(i, { bonus: total - earnedTotals[i] })
-
-  const resetScores = () => {
-    if (!window.confirm('Reset both team scores to 0? Revealed answers stay revealed.')) return
-    setTeams((prev) => prev.map((t) => ({ ...t, bonus: 0 })))
-    setRoundState((prev) =>
-      Object.fromEntries(Object.entries(prev).map(([id, s]) => [id, { ...s, awarded: {} }])),
-    )
-  }
-
-  const revealNext = () => {
-    const next = playable.find((a) => !revealed.has(a.id))
-    if (next) reveal(next.id)
-  }
-
-  const revealAll = () => {
-    if (playable.some((a) => !revealed.has(a.id)) && soundOn) playReveal()
-    updateState((s) => {
-      const awarded = { ...s.awarded }
-      for (const a of playable) if (!revealed.has(a.id)) awarded[a.id] = activeTeam
-      return { revealed: playable.map((a) => a.id), awarded }
-    })
-  }
-
-  const hideAll = () => updateState(() => ({ revealed: [], awarded: {} }))
-  const resetRound = () => updateState(() => ({ revealed: [], strikes: 0, awarded: {} }))
-
-  const strike = () => {
-    if (soundOn) playStrike()
-    updateState((s) => ({ strikes: Math.min((s.strikes ?? 0) + 1, 3) }))
-    setStrikeTick((t) => t + 1)
-  }
-
-  const goTo = (i) => {
-    setRoundIndex(Math.min(Math.max(i, 0), rounds.length - 1))
-    setStrikeTick(0)
-  }
-
-  const updateRound = (patch) =>
-    setRounds((prev) => prev.map((r, i) => (i === roundIndex ? { ...r, ...patch(r) } : r)))
-
-  const restoreRound = () => {
-    updateRound(() => structuredClone(defaultRounds[roundIndex]))
-  }
-
-  const restoreAll = () => {
-    if (!window.confirm('Restore ALL questions and vote counts to the defaults?')) return
-    setRounds(cloneDefaults())
-    setRoundState({})
-  }
+  // Sounds and the strike overlay follow the shared state, so they play here on the projector
+  // no matter which device (this laptop or the phone host page) made the change.
+  const seen = useRef({ roundId: round.id, revealed: state.revealed.length, strikeCount: state.strikeCount })
+  useEffect(() => {
+    const prev = seen.current
+    seen.current = { roundId: round.id, revealed: state.revealed.length, strikeCount: state.strikeCount }
+    if (prev.roundId !== round.id) {
+      setStrikeFlash(0)
+      return
+    }
+    if (state.revealed.length > prev.revealed && soundOn) playReveal()
+    if (state.strikeCount > prev.strikeCount) {
+      if (soundOn) playStrike()
+      setStrikeFlash((f) => f + 1)
+    }
+  }, [round.id, state.revealed.length, state.strikeCount, soundOn])
 
   useEffect(() => {
     const onKey = (e) => {
@@ -162,22 +48,22 @@ export default function App() {
       const key = e.key.length === 1 ? e.key.toLowerCase() : e.key
       if (key >= '1' && key <= '6') {
         const answer = answers[Number(key) - 1]
-        if (answer) reveal(answer.id)
+        if (answer) game.reveal(answer.id)
         return
       }
 
       const actions = {
-        ArrowLeft: () => goTo(roundIndex - 1),
-        ArrowRight: () => goTo(roundIndex + 1),
-        ' ': revealNext,
-        r: resetRound,
-        a: revealAll,
-        h: hideAll,
-        x: strike,
-        t: switchTeam,
+        ArrowLeft: () => game.goTo(roundIndex - 1),
+        ArrowRight: () => game.goTo(roundIndex + 1),
+        ' ': game.revealNext,
+        r: game.resetRound,
+        a: game.revealAll,
+        h: game.hideAll,
+        x: game.strike,
+        t: game.switchTeam,
         f: toggleFullscreen,
         e: () => setHostMode((v) => !v),
-        m: () => setSoundOn((v) => !v),
+        m: () => game.setSoundOn((v) => !v),
         '?': () => setShowHelp((v) => !v),
         Escape: () => {
           setShowHelp(false)
@@ -196,12 +82,12 @@ export default function App() {
 
   const renderTeam = (i) => (
     <TeamPanel
-      name={teams[i].name.trim() || `Team ${i + 1}`}
+      name={game.teamName(i)}
       side={i === 0 ? 'left' : 'right'}
-      total={teamTotals[i]}
-      roundPoints={roundPoints[i]}
-      active={activeTeam === i}
-      onSelect={() => setActiveTeam(i)}
+      total={game.teamTotals[i]}
+      roundPoints={game.roundPoints[i]}
+      active={game.activeTeam === i}
+      onSelect={() => game.setActiveTeam(i)}
     />
   )
 
@@ -241,13 +127,13 @@ export default function App() {
                   number={i + 1}
                   answer={answer}
                   revealed={revealed.has(answer.id)}
-                  onToggle={() => toggle(answer.id)}
+                  onToggle={() => game.toggle(answer.id)}
                 />
               ))}
             </div>
-            <div className="strikes" aria-label={`${state.strikes ?? 0} strikes`}>
+            <div className="strikes" aria-label={`${state.strikes} strikes`}>
               {[0, 1, 2].map((i) => (
-                <span key={i} className={`strikes__mark ${i < (state.strikes ?? 0) ? 'is-on' : ''}`}>
+                <span key={i} className={`strikes__mark ${i < state.strikes ? 'is-on' : ''}`}>
                   ✕
                 </span>
               ))}
@@ -270,7 +156,7 @@ export default function App() {
                   className={`progress__step ${i === roundIndex ? 'is-current' : ''} ${
                     i < roundIndex ? 'is-done' : ''
                   }`}
-                  onClick={() => goTo(i)}
+                  onClick={() => game.goTo(i)}
                   title={`Round ${i + 1}`}
                 >
                   {i + 1}
@@ -282,15 +168,15 @@ export default function App() {
           <HostControls
             canPrev={roundIndex > 0}
             canNext={roundIndex < rounds.length - 1}
-            onPrev={() => goTo(roundIndex - 1)}
-            onNext={() => goTo(roundIndex + 1)}
-            onReset={resetRound}
-            onRevealAll={revealAll}
-            onHideAll={hideAll}
-            onStrike={strike}
-            onSwitchTeam={switchTeam}
+            onPrev={() => game.goTo(roundIndex - 1)}
+            onNext={() => game.goTo(roundIndex + 1)}
+            onReset={game.resetRound}
+            onRevealAll={game.revealAll}
+            onHideAll={game.hideAll}
+            onStrike={game.strike}
+            onSwitchTeam={game.switchTeam}
             soundOn={soundOn}
-            onToggleSound={() => setSoundOn((v) => !v)}
+            onToggleSound={() => game.setSoundOn((v) => !v)}
             hostMode={hostMode}
             onToggleHost={() => setHostMode((v) => !v)}
             isFullscreen={isFullscreen}
@@ -300,29 +186,9 @@ export default function App() {
         </footer>
       </main>
 
-      {strikeTick > 0 && <StrikeOverlay key={strikeTick} count={state.strikes ?? 1} />}
+      {strikeFlash > 0 && <StrikeOverlay key={strikeFlash} count={Math.max(state.strikes, 1)} />}
 
-      {hostMode && (
-        <HostEditor
-          round={round}
-          roundIndex={roundIndex}
-          totalRounds={rounds.length}
-          onChangeQuestion={(question) => updateRound(() => ({ question }))}
-          onChangeAnswer={(id, patch) =>
-            updateRound((r) => ({
-              answers: r.answers.map((a) => (a.id === id ? { ...a, ...patch } : a)),
-            }))
-          }
-          teams={teams}
-          teamTotals={teamTotals}
-          onChangeTeamName={(i, name) => updateTeam(i, { name })}
-          onChangeTeamTotal={setTeamTotal}
-          onResetScores={resetScores}
-          onRestoreRound={restoreRound}
-          onRestoreAll={restoreAll}
-          onClose={() => setHostMode(false)}
-        />
-      )}
+      {hostMode && <HostEditor game={game} onClose={() => setHostMode(false)} />}
 
       {showHelp && <HelpOverlay onClose={() => setShowHelp(false)} />}
     </div>

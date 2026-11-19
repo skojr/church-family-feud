@@ -64,7 +64,39 @@ Your changes **save automatically**. Refreshing the page or closing the browser 
 
 The **Teams** section of the panel lets you rename each team and type in a team's total points if you need to correct it. **Reset team scores** sets both teams back to 0 for a new game.
 
-> **Tip:** Host Edit mode is visible on screen, so enter the results before the projector is on, or while the screen is turned away from the audience.
+> **Tip:** Host Edit mode is visible on screen, so enter the results before the projector is on, or while the screen is turned away from the audience. Or use the phone host page below, which the audience never sees.
+
+### Running the game from your phone (Host Mode)
+
+The host can control the game from a phone while the laptop shows the board on the projector. The phone shows every answer and vote count, so you can see what's coming without the audience seeing it. No internet or accounts are needed, but **the phone and laptop must be on the same Wi-Fi**.
+
+1. On the laptop, start the game with `npm run host` instead of `npm run dev`. The terminal shows two addresses, for example:
+   ```
+   Local:   http://localhost:5173/
+   Network: http://192.168.1.23:5173/
+   ```
+   If the Mac asks whether to allow incoming connections, click **Allow**.
+2. On the laptop, open the **Local** address in Chrome, press **F** for fullscreen, and click the page once (browsers only play sound after you've clicked the page).
+3. On the phone, open the **Network** address with `?view=host` added to the end, for example `http://192.168.1.23:5173/?view=host`. The banner should say **Connected**.
+
+On the phone you can:
+
+- Tap a team to make it the answering team.
+- Tap an answer to reveal it on the projector (its votes go to the answering team). Tap it again to hide it.
+- Strike, Switch team, Reveal all, Hide all, Reset round, Sound on/off, and change rounds with the arrows.
+- Use **Edit votes & teams** to type in the Mentimeter results, team names, and team totals.
+
+Everything you do on either device shows up on the other straight away. The laptop's keyboard and mouse controls keep working too, so if the phone has a problem, just carry on from the laptop.
+
+**If the phone won't connect:**
+
+- Some church or guest Wi-Fi networks block devices from talking to each other. Turn on your phone's **Personal Hotspot**, connect the laptop to it, restart `npm run host`, and use the new Network address.
+- Check the laptop hasn't gone to sleep, and that the terminal running `npm run host` is still open.
+- If the banner says **Reconnecting…**, wait a few seconds; it catches up automatically.
+
+> Don't edit the code files while the game is running: the pages reload when a file changes.
+>
+> The shared game state is also saved in a `.feud-sync.json` file in the game folder, so stopping and restarting `npm run host` keeps everything. To start completely fresh, stop the game, delete that file, and use **Restore all defaults** and **Reset team scores**.
 
 ---
 
@@ -139,6 +171,8 @@ To stop the game, go back to the terminal window and press **Ctrl + C**.
 - [ ] Turn up the laptop volume (or connect speakers) if you want the sounds.
 - [ ] Press **R** on any round you tested so it starts out hidden.
 - [ ] Enter the team names and click **Reset team scores** in Host Edit mode so both teams start at 0.
+- [ ] If you're hosting from a phone: at the venue, run `npm run host`, open the host page on the phone, and check that revealing an answer on the phone shows up on the projector.
+- [ ] Turn off laptop sleep and keep the laptop plugged in.
 
 ### Projector tips
 

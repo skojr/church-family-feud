@@ -1,0 +1,315 @@
+/* Phone host page. The global body has overflow hidden, so this page scrolls itself. */
+.host {
+  height: 100%;
+  overflow-y: auto;
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  padding: 0 14px calc(24px + env(safe-area-inset-bottom));
+  background: linear-gradient(180deg, #0a1a6e 0%, #050b38 60%, #120a45 100%);
+}
+
+.host button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+.host__banner {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  /* Own compositing layer, or iOS Safari paints scrolled form fields over the banner. */
+  transform: translateZ(0);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 10px;
+  margin: 0 -14px;
+  padding: calc(10px + env(safe-area-inset-top)) 14px 10px;
+  background: linear-gradient(180deg, var(--orange-400), #d9560a);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.host__banner strong {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: 18px;
+  letter-spacing: 0.12em;
+}
+
+.host__status {
+  margin-left: auto;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: none;
+  letter-spacing: 0.02em;
+}
+
+.host__status.is-on {
+  background: #0d6b35;
+}
+
+.host__status.is-off {
+  background: #8d1220;
+}
+
+.host__tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  padding: 4px;
+  border-radius: 12px;
+  background: rgba(3, 8, 40, 0.6);
+}
+
+.host__tabs button {
+  padding: 10px;
+  border: 0;
+  border-radius: 9px;
+  background: none;
+  font-weight: 800;
+  font-size: 14px;
+  color: var(--sky-300);
+}
+
+.host__tabs button.is-on {
+  background: var(--royal-600);
+  color: #fff;
+}
+
+.host__round {
+  display: grid;
+  grid-template-columns: 44px 1fr 44px;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+}
+
+.host__nav {
+  display: grid;
+  place-items: center;
+  height: 44px;
+  border: 1px solid rgba(160, 190, 255, 0.35);
+  border-radius: 12px;
+  background: rgba(40, 80, 220, 0.5);
+}
+
+.host__nav:disabled {
+  opacity: 0.3;
+}
+
+.host__round-label {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 13px;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: var(--orange-400);
+}
+
+.host__question {
+  margin: 2px 0 0;
+  font-weight: 800;
+  font-size: 16px;
+  line-height: 1.25;
+}
+
+.host__teams {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.host__team {
+  display: grid;
+  justify-items: center;
+  gap: 2px;
+  padding: 10px 8px 12px;
+  border: 2px solid rgba(160, 190, 255, 0.3);
+  border-radius: 14px;
+  background: rgba(13, 42, 168, 0.55);
+  opacity: 0.75;
+}
+
+.host__team.is-active {
+  opacity: 1;
+  border-color: var(--gold-300);
+  background: linear-gradient(180deg, #1b3fd0, #0a1d84);
+  box-shadow: 0 0 20px rgba(255, 140, 40, 0.55);
+}
+
+.host__team-flag {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--sky-300);
+}
+
+.is-active .host__team-flag {
+  color: var(--orange-400);
+}
+
+.host__team-name {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 800;
+  font-size: 15px;
+  text-transform: uppercase;
+}
+
+.host__team-total {
+  font-family: var(--font-display);
+  font-size: 38px;
+  line-height: 1.1;
+  color: var(--gold-300);
+}
+
+.host__team-round {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--sky-300);
+}
+
+.host__hint {
+  margin: 0;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.host__hint strong {
+  color: var(--gold-300);
+}
+
+.host__answers {
+  display: grid;
+  gap: 8px;
+}
+
+.host__answer {
+  display: grid;
+  grid-template-columns: 34px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 58px;
+  padding: 8px 12px;
+  border: 2px solid rgba(160, 190, 255, 0.3);
+  border-radius: 12px;
+  background: rgba(3, 8, 40, 0.6);
+  text-align: left;
+}
+
+.host__answer.is-revealed {
+  border-color: var(--orange-400);
+  background: linear-gradient(180deg, #2a62f2, #1440c0);
+}
+
+.host__answer:disabled {
+  opacity: 0.35;
+}
+
+.host__answer-num {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, var(--royal-500), var(--royal-800));
+  border: 2px solid #cfd6e4;
+  font-family: var(--font-display);
+  font-size: 16px;
+}
+
+.is-revealed .host__answer-num {
+  background: linear-gradient(180deg, var(--gold-300), var(--orange-500));
+  color: #3a1400;
+}
+
+.host__answer-text {
+  display: grid;
+  min-width: 0;
+  font-weight: 800;
+  font-size: 16px;
+  text-transform: uppercase;
+}
+
+.host__answer-text small {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: none;
+  color: var(--sky-300);
+}
+
+.is-revealed .host__answer-text small {
+  color: #fff;
+}
+
+.host__answer-votes {
+  font-family: var(--font-display);
+  font-size: 24px;
+  color: var(--gold-300);
+}
+
+.host__actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.host__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 50px;
+  padding: 10px;
+  border: 1px solid rgba(160, 190, 255, 0.35);
+  border-radius: 12px;
+  background: rgba(40, 80, 220, 0.5);
+  font-weight: 800;
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.host__btn:active,
+.host__answer:active,
+.host__team:active {
+  transform: scale(0.98);
+}
+
+.host__btn--strike {
+  grid-column: 1 / -1;
+  min-height: 60px;
+  background: #b81d2b;
+  border-color: #ff8a8a;
+  font-size: 17px;
+}
+
+/* Host editor rendered inside the page */
+.editor.editor--inline {
+  position: relative;
+  z-index: 0;
+  width: auto;
+  padding: 0;
+  overflow: visible;
+  background: none;
+  border: 0;
+  box-shadow: none;
+  animation: none;
+}
+
+/* 16px+ stops iOS from zooming into inputs on focus. */
+.host .editor input,
+.host .editor textarea {
+  font-size: 16px;
+}
+
+.host .editor__row {
+  grid-template-columns: 30px 1fr 90px;
+}

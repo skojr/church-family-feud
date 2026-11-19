@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { RotateCcw, X } from 'lucide-react'
 import { sortByVotes } from '../data/rounds'
+import { syncEnabled } from '../lib/sync'
 
 // Keeps its own text so the field can be cleared while typing; an empty field counts as 0.
 function NumberInput({ value, onChange, className = 'editor__votes', label }) {
@@ -33,21 +34,9 @@ function NumberInput({ value, onChange, className = 'editor__votes', label }) {
   )
 }
 
-export default function HostEditor({
-  round,
-  roundIndex,
-  totalRounds,
-  onChangeQuestion,
-  onChangeAnswer,
-  teams,
-  teamTotals,
-  onChangeTeamName,
-  onChangeTeamTotal,
-  onResetScores,
-  onRestoreRound,
-  onRestoreAll,
-  onClose,
-}) {
+// `inline` renders the form inside a page (the phone host view) instead of as the slide-out drawer.
+export default function HostEditor({ game, onClose, inline = false }) {
+  const { round, roundIndex, rounds, teams, teamTotals } = game
   const total = round.answers.reduce((sum, a) => sum + (Number(a.votes) || 0), 0)
 
   // Rows would jump mid-keystroke if re-sorted live, so the order is frozen while focus is in the list.
@@ -57,25 +46,27 @@ export default function HostEditor({
     : sortByVotes(round.answers)
 
   return (
-    <aside className="editor" aria-label="Host editor">
-      <header className="editor__head">
-        <div>
-          <p className="editor__kicker">Host Edit Mode</p>
-          <h2>
-            Round {roundIndex + 1} <span>of {totalRounds}</span>
-          </h2>
-        </div>
-        <button type="button" className="editor__close" onClick={onClose} title="Close (E)">
-          <X size={20} />
-        </button>
-      </header>
+    <aside className={`editor ${inline ? 'editor--inline' : ''}`} aria-label="Host editor">
+      {!inline && (
+        <header className="editor__head">
+          <div>
+            <p className="editor__kicker">Host Edit Mode</p>
+            <h2>
+              Round {roundIndex + 1} <span>of {rounds.length}</span>
+            </h2>
+          </div>
+          <button type="button" className="editor__close" onClick={onClose} title="Close (E)">
+            <X size={20} />
+          </button>
+        </header>
+      )}
 
       <label className="editor__field">
         <span>Question</span>
         <textarea
           rows={2}
           value={round.question}
-          onChange={(e) => onChangeQuestion(e.target.value)}
+          onChange={(e) => game.changeQuestion(e.target.value)}
         />
       </label>
 
@@ -98,9 +89,9 @@ export default function HostEditor({
               type="text"
               value={a.text}
               placeholder="(blank slot)"
-              onChange={(e) => onChangeAnswer(a.id, { text: e.target.value })}
+              onChange={(e) => game.changeAnswer(a.id, { text: e.target.value })}
             />
-            <NumberInput value={a.votes} onChange={(votes) => onChangeAnswer(a.id, { votes })} />
+            <NumberInput value={a.votes} onChange={(votes) => game.changeAnswer(a.id, { votes })} />
           </div>
         ))}
         <div className="editor__total">
@@ -121,27 +112,31 @@ export default function HostEditor({
               type="text"
               value={team.name}
               placeholder={`Team ${i + 1}`}
-              onChange={(e) => onChangeTeamName(i, e.target.value)}
+              onChange={(e) => game.changeTeamName(i, e.target.value)}
             />
             <NumberInput
               value={teamTotals[i]}
               label={`${team.name} total points`}
-              onChange={(total) => onChangeTeamTotal(i, total)}
+              onChange={(total) => game.setTeamTotal(i, total)}
             />
           </div>
         ))}
-        <button type="button" className="editor__btn editor__btn--small" onClick={onResetScores}>
+        <button type="button" className="editor__btn editor__btn--small" onClick={game.resetScores}>
           <RotateCcw size={14} /> Reset team scores
         </button>
       </div>
 
-      <p className="editor__note">Changes save automatically to this browser.</p>
+      <p className="editor__note">
+        {syncEnabled
+          ? 'Changes save automatically and sync to every connected screen.'
+          : 'Changes save automatically to this browser.'}
+      </p>
 
       <div className="editor__actions">
-        <button type="button" className="editor__btn" onClick={onRestoreRound}>
+        <button type="button" className="editor__btn" onClick={game.restoreRound}>
           <RotateCcw size={16} /> Restore this round
         </button>
-        <button type="button" className="editor__btn editor__btn--danger" onClick={onRestoreAll}>
+        <button type="button" className="editor__btn editor__btn--danger" onClick={game.restoreAll}>
           <RotateCcw size={16} /> Restore all defaults
         </button>
       </div>
