@@ -94,9 +94,9 @@ export default function App() {
   return (
     <div className={`app ${hostMode ? 'is-editing' : ''}`}>
       <div className="backdrop" aria-hidden="true">
-        <div className="backdrop__glow backdrop__glow--blue" />
-        <div className="backdrop__glow backdrop__glow--purple" />
-        <div className="backdrop__glow backdrop__glow--orange" />
+        <div className="backdrop__glow backdrop__glow--violet" />
+        <div className="backdrop__glow backdrop__glow--royal" />
+        <div className="backdrop__glow backdrop__glow--magenta" />
         <div className="backdrop__beams" />
       </div>
 

@@ -1,26 +1,17 @@
-function CrossMark({ className }) {
-  return (
-    <svg className={className} viewBox="0 0 24 32" aria-hidden="true">
-      <path d="M9.5 0h5v9h9.5v5h-9.5v18h-5V14H0V9h9.5z" />
-    </svg>
-  )
-}
+import IcgcLogo from './IcgcLogo'
 
 export default function Brand() {
   return (
     <div className="brand">
       <div className="brand__rays" aria-hidden="true" />
       <h1 className="brand__title">
-        <span className="brand__icgc">ICGC</span>
-        <span className="brand__edition">
-          <span>Gathering</span>
-          <span>Edition</span>
-        </span>
+        <span className="brand__the">The</span>
+        <span className="brand__name">Gathering</span>
+        <span className="brand__year">’26</span>
       </h1>
       <div className="brand__ribbon">
-        <CrossMark className="brand__cross" />
+        <IcgcLogo className="brand__logo" />
         <span>Family Feud</span>
-        <CrossMark className="brand__cross" />
       </div>
     </div>
   )

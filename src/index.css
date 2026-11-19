@@ -1,37 +1,45 @@
-@import '@fontsource/anton/400.css';
+@import '@fontsource/league-gothic/400.css';
+@import '@fontsource/cinzel/800.css';
 @import '@fontsource/montserrat/600.css';
 @import '@fontsource/montserrat/800.css';
 
 :root {
-  --navy-950: #030726;
-  --navy-900: #071047;
-  --royal-800: #0b2a9e;
-  --royal-600: #1745d6;
-  --royal-500: #2a62ff;
-  --sky-300: #8fb8ff;
-  --purple-700: #4a1a9e;
-  --purple-500: #7a3cf0;
-  --orange-500: #ff7a18;
-  --orange-400: #ff9a3c;
-  --gold-300: #ffd27a;
+  /* ICGC · The Gathering '26 */
+  --night: #1a0b33; /* page background, deepest shadow */
+  --plum: #2d1159; /* panels, board frame, hidden slots */
+  --violet: #4604b1; /* answer bars, question banner */
+  --violet-glow: #7902ff; /* revealed bars, glows, active */
+  --coral: #ff7363; /* title, points, primary accent */
+  --coral-deep: #e2553f; /* coral pressed / gradient end */
+  --magenta-glow: #df3c80; /* edge glow only */
+  --white: #ffffff;
+  --white-soft: rgba(255, 255, 255, 0.72); /* secondary labels */
+  --strike-red: #ff2727;
 
-  --chrome: linear-gradient(
+  /* Bevelled border used around panels (paint as `border-box` under a `padding-box` fill). */
+  --frame: linear-gradient(
     180deg,
-    #ffffff 0%,
-    #cfd6e4 18%,
-    #8a94a8 45%,
-    #3a404d 52%,
-    #9aa3b5 70%,
-    #eef1f7 100%
+    rgba(255, 255, 255, 0.85) 0%,
+    #b48cff 22%,
+    var(--violet-glow) 50%,
+    var(--plum) 56%,
+    #9a6bff 80%,
+    rgba(255, 255, 255, 0.75) 100%
   );
 
-  --font-display: 'Anton', Impact, 'Arial Narrow Bold', sans-serif;
+  --font-display: 'League Gothic', 'Anton', Impact, sans-serif;
+  --font-serif: 'Cinzel', 'Trajan Pro', Georgia, serif;
   --font-body: 'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif;
+
+  --backdrop:
+    radial-gradient(ellipse 50% 60% at 100% 0%, rgba(223, 60, 128, 0.55), transparent 65%),
+    radial-gradient(ellipse 60% 60% at 0% 100%, rgba(121, 2, 255, 0.6), transparent 65%),
+    linear-gradient(160deg, var(--violet) 0%, var(--plum) 55%, var(--night) 100%);
 
   color-scheme: dark;
   font-family: var(--font-body);
-  color: #fff;
-  background: var(--navy-950);
+  color: var(--white);
+  background: var(--night);
   -webkit-font-smoothing: antialiased;
 }
 
@@ -68,7 +76,7 @@ button:disabled {
 }
 
 :focus-visible {
-  outline: 3px solid var(--orange-400);
+  outline: 3px solid var(--violet-glow);
   outline-offset: 3px;
 }
 
