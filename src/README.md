@@ -7,7 +7,7 @@ This folder contains all of the code for the ICGC Gathering Edition Family Feud 
 | File | Purpose |
 | --- | --- |
 | `main.jsx` | Entry point. Mounts the `App` component into the page. |
-| `App.jsx` | The game itself. Holds all game state (current round, revealed answers, strikes, host mode, sound), wires up keyboard shortcuts, and lays out the screen. |
+| `App.jsx` | The game itself. Holds all game state (current round, revealed answers, strikes, teams and scores, host mode, sound), wires up keyboard shortcuts, and lays out the screen. Each revealed answer records which team was answering, and team scores are calculated from that plus any manual adjustment from Host Edit mode. |
 | `App.css` | All game-show styling: background lighting, title, board frame, answer-card flip animation, controls, host editor, and overlays. |
 | `index.css` | Global styles: fonts, color palette variables, and base resets. |
 
@@ -19,8 +19,9 @@ Each component is one visual piece of the screen. They receive data and callback
 | --- | --- |
 | `Brand.jsx` | The "ICGC GATHERING EDITION" title with the orange "FAMILY FEUD" ribbon and the rotating light rays behind it. |
 | `AnswerCard.jsx` | One answer row on the board. The front shows the number badge and a panel labeled "ICGC: The Gathering". The back shows the answer text and its vote count. Clicking it flips between the two. |
-| `HostControls.jsx` | The row of buttons along the bottom (Prev, Reset, Hide All, Reveal All, Strike, Next, Sound, Host Edit, Keys, Fullscreen). |
-| `HostEditor.jsx` | The slide-out side panel used in Host Edit mode to change the question, answers, and vote counts for the current round, or restore the defaults. |
+| `TeamPanel.jsx` | One team's column beside the board: a card with the name, total points, and "Answering" tag (clicking it makes that team the one answering), plus a "This round" card underneath with the points earned in the current round. |
+| `HostControls.jsx` | The row of buttons along the bottom (Prev, Reset, Hide All, Reveal All, Strike, Team, Next, Sound, Host Edit, Keys, Fullscreen). |
+| `HostEditor.jsx` | The slide-out side panel used in Host Edit mode to change the question, answers, and vote counts for the current round, rename teams, correct team totals, or restore the defaults. |
 | `StrikeOverlay.jsx` | The big red ✕ marks that flash across the screen when the host adds a strike. |
 | `HelpOverlay.jsx` | The pop-up list of keyboard shortcuts (opened with `?`). |
 
@@ -30,7 +31,7 @@ Small reusable pieces of logic used by `App.jsx`.
 
 | Hook | What it does |
 | --- | --- |
-| `useLocalStorage.js` | Works like React's `useState`, but also saves the value to the browser's `localStorage` and loads it back on refresh. It can take a validation function so that old or broken saved data is ignored. Used for the questions and votes, the current round, revealed answers and strikes, and the sound setting. |
+| `useLocalStorage.js` | Works like React's `useState`, but also saves the value to the browser's `localStorage` and loads it back on refresh. It can take a validation function so that old or broken saved data is ignored. Used for the questions and votes, the current round, revealed answers and strikes, the teams and which one is answering, and the sound setting. |
 | `useFullscreen.js` | Reports whether the page is currently fullscreen and provides a function that turns fullscreen on or off. |
 
 ## `data/`

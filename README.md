@@ -10,10 +10,11 @@ A Family Feud–style game show board made for the ICGC church gathering. It run
 
 ### What the audience sees
 
-- The **ICGC Gathering Edition** title at the top, with the **round number** on the left and the **points** for the current round on the right.
+- The **ICGC Gathering Edition** title at the top, with the **round number** on the left.
 - The **question** for the round in a banner across the screen.
 - A board with **six numbered answer slots**. Answers stay hidden until the host reveals them.
-- When the host reveals an answer, the slot **flips over** with a chime and shows the answer and how many people voted for it. The points box adds those votes to the round total.
+- When the host reveals an answer, the slot **flips over** with a chime and shows the answer and how many people voted for it. Those votes are added to the score of the team that is answering.
+- A **team card** on each side of the board shows that team's **total points**, with a smaller **This round** card underneath showing what the team has earned in the current round. The team that is currently answering glows and has an **Answering** tag.
 
 There are **10 rounds**, each with its own question.
 
@@ -21,7 +22,8 @@ There are **10 rounds**, each with its own question.
 
 The host runs the game from the laptop, using the mouse or the keyboard.
 
-- **Reveal an answer:** click its slot, or press its number (**1–6**). Answers can be revealed in any order. Clicking a revealed answer hides it again.
+- **Choose which team is answering:** click that team's panel, press **T**, or click **Team** to switch.
+- **Reveal an answer:** click its slot, or press its number (**1–6**). Answers can be revealed in any order. The answer's votes go to the team that is answering. Clicking a revealed answer hides it again and takes those points back.
 - **Reveal the next hidden answer:** press **Space**.
 - **Wrong answer:** press **X** (or click **Strike**) to flash a big red ✕ with a buzzer. Each round keeps track of up to 3 strikes, shown under the board.
 - **Change rounds:** use the **← / →** arrow keys, the **Prev / Next** buttons, or click a numbered dot at the bottom left.
@@ -40,6 +42,7 @@ The buttons along the bottom stay faded so they don't distract the audience. Mov
 | **H** | Hide all answers |
 | **R** | Reset the round (hides answers and clears strikes) |
 | **X** | Add a strike |
+| **T** | Switch which team is answering |
 | **F** | Fullscreen on/off |
 | **E** | Open/close Host Edit mode |
 | **M** | Sound on/off |
@@ -58,6 +61,8 @@ Your changes **save automatically**. Refreshing the page or closing the browser 
 
 - **Restore this round** puts the current round back to its original questions and votes.
 - **Restore all defaults** does the same for all 10 rounds.
+
+The **Teams** section of the panel lets you rename each team and type in a team's total points if you need to correct it. **Reset team scores** sets both teams back to 0 for a new game.
 
 > **Tip:** Host Edit mode is visible on screen, so enter the results before the projector is on, or while the screen is turned away from the audience.
 
@@ -133,6 +138,16 @@ To stop the game, go back to the terminal window and press **Ctrl + C**.
 - [ ] Connect the projector and press **F** for fullscreen.
 - [ ] Turn up the laptop volume (or connect speakers) if you want the sounds.
 - [ ] Press **R** on any round you tested so it starts out hidden.
+- [ ] Enter the team names and click **Reset team scores** in Host Edit mode so both teams start at 0.
+
+### Projector tips
+
+The game always draws a 16:9 board and scales it to fit the screen, so it looks the same on any laptop or projector. On a 4:3 projector you'll see a little extra background above and below the board.
+
+- **Keep the browser zoom at 100%.** Press **Cmd + 0** (Mac) or **Ctrl + 0** (Windows) to reset it. Zooming in or out shrinks or enlarges everything.
+- **Use the projector's own resolution.** On a Mac, open **System Settings → Displays**, select the projector, and choose its default resolution (usually 1920 × 1080 or 1280 × 720).
+- **Mirror or extend:** mirroring shows the same screen on both. Extending lets you drag the game window onto the projector and keep the laptop screen for yourself. Either works; press **F** after the window is on the projector.
+- **If the edges are cut off on the wall,** the projector is cropping the picture ("overscan"). Turn off overscan in the projector's menu, or on a Mac turn on **Underscan** in the display settings.
 
 ---
 

@@ -9,17 +9,44 @@ import HostControls from './components/HostControls'
 import HostEditor from './components/HostEditor'
 import HelpOverlay from './components/HelpOverlay'
 import StrikeOverlay from './components/StrikeOverlay'
+import TeamPanel from './components/TeamPanel'
 import './App.css'
 
 const cloneDefaults = () => structuredClone(defaultRounds)
 const isPlainObject = (v) => v !== null && typeof v === 'object' && !Array.isArray(v)
 
+const defaultTeams = () => [
+  { name: 'Team 1', bonus: 0 },
+  { name: 'Team 2', bonus: 0 },
+]
+const isValidTeams = (v) =>
+  Array.isArray(v) &&
+  v.length === 2 &&
+  v.every((t) => isPlainObject(t) && typeof t.name === 'string' && Number.isFinite(t.bonus))
+
+// Points a round has earned each team: revealed answers credited to the team that was answering.
+const roundTeamPoints = (round, state) => {
+  const points = [0, 0]
+  const revealed = new Set(state?.revealed ?? [])
+  const awarded = state?.awarded ?? {}
+  for (const a of round.answers) {
+    const team = awarded[a.id]
+    if (a.text.trim() && revealed.has(a.id) && (team === 0 || team === 1)) {
+      points[team] += Number(a.votes) || 0
+    }
+  }
+  return points
+}
+
 export default function App() {
   const [rounds, setRounds] = useLocalStorage('igc-feud:rounds', cloneDefaults, isValidRounds)
   const [storedIndex, setRoundIndex] = useLocalStorage('igc-feud:round', 0)
-  // { [roundId]: { revealed: number[], strikes: number } }
+  // { [roundId]: { revealed: number[], strikes: number, awarded: { [answerId]: teamIndex } } }
   const [roundState, setRoundState] = useLocalStorage('igc-feud:state', {}, isPlainObject)
   const [soundOn, setSoundOn] = useLocalStorage('igc-feud:sound', true)
+  // `bonus` holds manual adjustments from Host Edit on top of the points earned from reveals.
+  const [teams, setTeams] = useLocalStorage('igc-feud:teams', defaultTeams, isValidTeams)
+  const [activeTeam, setActiveTeam] = useLocalStorage('igc-feud:active-team', 0, (v) => v === 0 || v === 1)
   const [hostMode, setHostMode] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
   const [strikeTick, setStrikeTick] = useState(0)
@@ -31,7 +58,15 @@ export default function App() {
   const revealed = new Set(state.revealed)
   const answers = sortByVotes(round.answers)
   const playable = answers.filter((a) => a.text.trim())
-  const score = playable.filter((a) => revealed.has(a.id)).reduce((s, a) => s + a.votes, 0)
+  const roundPoints = roundTeamPoints(round, state)
+  const earnedTotals = rounds.reduce(
+    (sum, r) => {
+      const p = roundTeamPoints(r, roundState[r.id])
+      return [sum[0] + p[0], sum[1] + p[1]]
+    },
+    [0, 0],
+  )
+  const teamTotals = teams.map((t, i) => earnedTotals[i] + t.bonus)
 
   const updateState = (patch) =>
     setRoundState((prev) => {
@@ -43,12 +78,35 @@ export default function App() {
     const answer = round.answers.find((a) => a.id === id)
     if (!answer?.text.trim() || revealed.has(id)) return
     if (soundOn) playReveal()
-    updateState((s) => ({ revealed: [...s.revealed, id] }))
+    updateState((s) => ({
+      revealed: [...s.revealed, id],
+      awarded: { ...s.awarded, [id]: activeTeam },
+    }))
   }
 
   const toggle = (id) => {
-    if (revealed.has(id)) updateState((s) => ({ revealed: s.revealed.filter((r) => r !== id) }))
-    else reveal(id)
+    if (revealed.has(id)) {
+      updateState((s) => {
+        const awarded = { ...s.awarded }
+        delete awarded[id]
+        return { revealed: s.revealed.filter((r) => r !== id), awarded }
+      })
+    } else reveal(id)
+  }
+
+  const switchTeam = () => setActiveTeam((t) => (t === 0 ? 1 : 0))
+
+  const updateTeam = (i, patch) =>
+    setTeams((prev) => prev.map((t, j) => (j === i ? { ...t, ...patch } : t)))
+
+  const setTeamTotal = (i, total) => updateTeam(i, { bonus: total - earnedTotals[i] })
+
+  const resetScores = () => {
+    if (!window.confirm('Reset both team scores to 0? Revealed answers stay revealed.')) return
+    setTeams((prev) => prev.map((t) => ({ ...t, bonus: 0 })))
+    setRoundState((prev) =>
+      Object.fromEntries(Object.entries(prev).map(([id, s]) => [id, { ...s, awarded: {} }])),
+    )
   }
 
   const revealNext = () => {
@@ -58,11 +116,15 @@ export default function App() {
 
   const revealAll = () => {
     if (playable.some((a) => !revealed.has(a.id)) && soundOn) playReveal()
-    updateState(() => ({ revealed: playable.map((a) => a.id) }))
+    updateState((s) => {
+      const awarded = { ...s.awarded }
+      for (const a of playable) if (!revealed.has(a.id)) awarded[a.id] = activeTeam
+      return { revealed: playable.map((a) => a.id), awarded }
+    })
   }
 
-  const hideAll = () => updateState(() => ({ revealed: [] }))
-  const resetRound = () => updateState(() => ({ revealed: [], strikes: 0 }))
+  const hideAll = () => updateState(() => ({ revealed: [], awarded: {} }))
+  const resetRound = () => updateState(() => ({ revealed: [], strikes: 0, awarded: {} }))
 
   const strike = () => {
     if (soundOn) playStrike()
@@ -112,6 +174,7 @@ export default function App() {
         a: revealAll,
         h: hideAll,
         x: strike,
+        t: switchTeam,
         f: toggleFullscreen,
         e: () => setHostMode((v) => !v),
         m: () => setSoundOn((v) => !v),
@@ -130,6 +193,17 @@ export default function App() {
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   })
+
+  const renderTeam = (i) => (
+    <TeamPanel
+      name={teams[i].name.trim() || `Team ${i + 1}`}
+      side={i === 0 ? 'left' : 'right'}
+      total={teamTotals[i]}
+      roundPoints={roundPoints[i]}
+      active={activeTeam === i}
+      onSelect={() => setActiveTeam(i)}
+    />
+  )
 
   return (
     <div className={`app ${hostMode ? 'is-editing' : ''}`}>
@@ -150,38 +224,38 @@ export default function App() {
             </span>
           </div>
           <Brand />
-          <div className="scorebox scorebox--points">
-            <span className="scorebox__label">Points</span>
-            <span className="scorebox__value" key={score}>
-              {score}
-            </span>
-          </div>
         </header>
 
         <section className="question" key={`q-${round.id}`}>
           <p>{round.question}</p>
         </section>
 
-        <section className="board-frame">
-          <div className="board" key={`b-${round.id}`}>
-            {answers.map((answer, i) => (
-              <AnswerCard
-                key={answer.id}
-                number={i + 1}
-                answer={answer}
-                revealed={revealed.has(answer.id)}
-                onToggle={() => toggle(answer.id)}
-              />
-            ))}
-          </div>
-          <div className="strikes" aria-label={`${state.strikes ?? 0} strikes`}>
-            {[0, 1, 2].map((i) => (
-              <span key={i} className={`strikes__mark ${i < (state.strikes ?? 0) ? 'is-on' : ''}`}>
-                ✕
-              </span>
-            ))}
-          </div>
-        </section>
+        <div className="arena">
+          {renderTeam(0)}
+
+          <section className="board-frame">
+            <div className="board" key={`b-${round.id}`}>
+              {answers.map((answer, i) => (
+                <AnswerCard
+                  key={answer.id}
+                  number={i + 1}
+                  answer={answer}
+                  revealed={revealed.has(answer.id)}
+                  onToggle={() => toggle(answer.id)}
+                />
+              ))}
+            </div>
+            <div className="strikes" aria-label={`${state.strikes ?? 0} strikes`}>
+              {[0, 1, 2].map((i) => (
+                <span key={i} className={`strikes__mark ${i < (state.strikes ?? 0) ? 'is-on' : ''}`}>
+                  ✕
+                </span>
+              ))}
+            </div>
+          </section>
+
+          {renderTeam(1)}
+        </div>
 
         <footer className="footer">
           <nav className="progress" aria-label="Rounds">
@@ -214,6 +288,7 @@ export default function App() {
             onRevealAll={revealAll}
             onHideAll={hideAll}
             onStrike={strike}
+            onSwitchTeam={switchTeam}
             soundOn={soundOn}
             onToggleSound={() => setSoundOn((v) => !v)}
             hostMode={hostMode}
@@ -238,6 +313,11 @@ export default function App() {
               answers: r.answers.map((a) => (a.id === id ? { ...a, ...patch } : a)),
             }))
           }
+          teams={teams}
+          teamTotals={teamTotals}
+          onChangeTeamName={(i, name) => updateTeam(i, { name })}
+          onChangeTeamTotal={setTeamTotal}
+          onResetScores={resetScores}
           onRestoreRound={restoreRound}
           onRestoreAll={restoreAll}
           onClose={() => setHostMode(false)}

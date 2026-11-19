@@ -1,4 +1,5 @@
 import {
+  ArrowLeftRight,
   ChevronLeft,
   ChevronRight,
   Eye,
@@ -37,6 +38,7 @@ export default function HostControls({
   onRevealAll,
   onHideAll,
   onStrike,
+  onSwitchTeam,
   soundOn,
   onToggleSound,
   hostMode,
@@ -53,6 +55,7 @@ export default function HostControls({
         <Btn icon={EyeOff} label="Hide All" onClick={onHideAll} hint="H" />
         <Btn icon={Eye} label="Reveal All" onClick={onRevealAll} hint="A" />
         <Btn icon={X} label="Strike" onClick={onStrike} variant="danger" hint="X" />
+        <Btn icon={ArrowLeftRight} label="Team" onClick={onSwitchTeam} hint="T" />
         <Btn icon={ChevronRight} label="Next" onClick={onNext} disabled={!canNext} hint="→" />
       </div>
       <div className="controls__group">

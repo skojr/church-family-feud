@@ -2,14 +2,14 @@ import { useState } from 'react'
 import { RotateCcw, X } from 'lucide-react'
 import { sortByVotes } from '../data/rounds'
 
-// Keeps its own text so the field can be cleared while typing; an empty field counts as 0 votes.
-function VotesInput({ votes, onChange }) {
-  const [draft, setDraft] = useState(String(votes))
-  const [lastVotes, setLastVotes] = useState(votes)
+// Keeps its own text so the field can be cleared while typing; an empty field counts as 0.
+function NumberInput({ value, onChange, className = 'editor__votes', label }) {
+  const [draft, setDraft] = useState(String(value))
+  const [lastValue, setLastValue] = useState(value)
 
-  if (votes !== lastVotes) {
-    setLastVotes(votes)
-    if (Number(draft || 0) !== votes) setDraft(String(votes))
+  if (value !== lastValue) {
+    setLastValue(value)
+    if (Number(draft || 0) !== value) setDraft(String(value))
   }
 
   return (
@@ -17,7 +17,8 @@ function VotesInput({ votes, onChange }) {
       type="text"
       inputMode="numeric"
       pattern="[0-9]*"
-      className="editor__votes"
+      className={className}
+      aria-label={label}
       value={draft}
       placeholder="0"
       onChange={(e) => {
@@ -38,6 +39,11 @@ export default function HostEditor({
   totalRounds,
   onChangeQuestion,
   onChangeAnswer,
+  teams,
+  teamTotals,
+  onChangeTeamName,
+  onChangeTeamTotal,
+  onResetScores,
   onRestoreRound,
   onRestoreAll,
   onClose,
@@ -94,12 +100,39 @@ export default function HostEditor({
               placeholder="(blank slot)"
               onChange={(e) => onChangeAnswer(a.id, { text: e.target.value })}
             />
-            <VotesInput votes={a.votes} onChange={(votes) => onChangeAnswer(a.id, { votes })} />
+            <NumberInput value={a.votes} onChange={(votes) => onChangeAnswer(a.id, { votes })} />
           </div>
         ))}
         <div className="editor__total">
           Total votes <strong>{total}</strong>
         </div>
+      </div>
+
+      <div className="editor__answers">
+        <div className="editor__row editor__row--head">
+          <span />
+          <span>Team</span>
+          <span>Total pts</span>
+        </div>
+        {teams.map((team, i) => (
+          <div className="editor__row" key={i}>
+            <span className="editor__num">{i + 1}</span>
+            <input
+              type="text"
+              value={team.name}
+              placeholder={`Team ${i + 1}`}
+              onChange={(e) => onChangeTeamName(i, e.target.value)}
+            />
+            <NumberInput
+              value={teamTotals[i]}
+              label={`${team.name} total points`}
+              onChange={(total) => onChangeTeamTotal(i, total)}
+            />
+          </div>
+        ))}
+        <button type="button" className="editor__btn editor__btn--small" onClick={onResetScores}>
+          <RotateCcw size={14} /> Reset team scores
+        </button>
       </div>
 
       <p className="editor__note">Changes save automatically to this browser.</p>
