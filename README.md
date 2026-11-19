@@ -10,7 +10,7 @@ A Family Feud–style game show board made for the ICGC church gathering. It run
 
 ### What the audience sees
 
-- The **ICGC Gathering Edition** title at the top, with the **round number** on the left.
+- **The Gathering ’26** title at the top, with the **round number** on the left.
 - The **question** for the round in a banner across the screen.
 - A board with **six numbered answer slots**. Answers stay hidden until the host reveals them.
 - When the host reveals an answer, the slot **flips over** with a chime and shows the answer and how many people voted for it. Those votes are added to the score of the team that is answering.
@@ -68,98 +68,25 @@ The **Teams** section of the panel lets you rename each team and type in a team'
 
 ### Running the game from your phone (Host Mode)
 
-The host can control the game from a phone while the laptop shows the board on the projector. The phone shows every answer and vote count, so you can see what's coming without the audience seeing it. No internet or accounts are needed, but **the phone and laptop must be on the same Wi-Fi**.
+The host can control the game from a phone while the laptop shows the board on the projector. The phone shows every answer and vote count, so you can see what's coming without the audience seeing it. You can reveal answers, add strikes, switch teams, change rounds, and enter the vote counts from the phone. Everything you do on either device shows up on the other straight away.
 
-1. On the laptop, start the game with `npm run host` instead of `npm run dev`. The terminal shows two addresses, for example:
-   ```
-   Local:   http://localhost:5173/
-   Network: http://192.168.1.23:5173/
-   ```
-   If the Mac asks whether to allow incoming connections, click **Allow**.
-2. On the laptop, open the **Local** address in Chrome, press **F** for fullscreen, and click the page once (browsers only play sound after you've clicked the page).
-3. On the phone, open the **Network** address with `?view=host` added to the end, for example `http://192.168.1.23:5173/?view=host`. The banner should say **Connected**.
+No internet or accounts are needed, but **the phone and laptop must be on the same network**, and the game must be started with `npm run host` instead of `npm run dev`.
 
-On the phone you can:
-
-- Tap a team to make it the answering team.
-- Tap an answer to reveal it on the projector (its votes go to the answering team). Tap it again to hide it.
-- Strike, Switch team, Reveal all, Hide all, Reset round, Sound on/off, and change rounds with the arrows.
-- Use **Edit votes & teams** to type in the Mentimeter results, team names, and team totals.
-
-Everything you do on either device shows up on the other straight away. The laptop's keyboard and mouse controls keep working too, so if the phone has a problem, just carry on from the laptop.
-
-**If the phone won't connect:**
-
-- Some church or guest Wi-Fi networks block devices from talking to each other. Turn on your phone's **Personal Hotspot**, connect the laptop to it, restart `npm run host`, and use the new Network address.
-- Check the laptop hasn't gone to sleep, and that the terminal running `npm run host` is still open.
-- If the banner says **Reconnecting…**, wait a few seconds; it catches up automatically.
-
-> Don't edit the code files while the game is running: the pages reload when a file changes.
->
-> The shared game state is also saved in a `.feud-sync.json` file in the game folder, so stopping and restarting `npm run host` keeps everything. To start completely fresh, stop the game, delete that file, and use **Restore all defaults** and **Reset team scores**.
+See the **[Setup Guide](setup.md)** for step-by-step instructions on starting host mode, connecting the phone, and fixing connection problems.
 
 ---
 
 ## Getting it onto your computer
 
-You only need to do this once per computer.
+Follow the **[Setup Guide](setup.md)**. It covers installing Node.js, downloading the game, starting it on the laptop, and (optionally) exposing it so a phone can control it.
 
-### 1. Install Node.js
-
-The game uses a free program called **Node.js** to run.
-
-1. Go to [nodejs.org](https://nodejs.org/).
-2. Download the **LTS** version (version 22 or newer) and install it with the default options.
-
-### 2. Download the game from GitHub
-
-Pick **one** of these options.
-
-**Option A — Download a ZIP (easiest)**
-
-1. Open the project's GitHub page in your browser.
-2. Click the green **Code** button, then click **Download ZIP**.
-3. Find the ZIP in your Downloads folder and double-click it to unzip it.
-4. Move the unzipped folder somewhere easy to find, such as your Desktop or Documents.
-
-**Option B — Use Git (if you already have it)**
+The short version, once Node.js is installed, from the game folder:
 
 ```bash
-git clone https://github.com/<your-username>/<repo-name>.git
+npm install     # first time only
+npm run dev     # laptop only
+npm run host    # laptop + phone control
 ```
-
-Replace the address with the one shown under the green **Code** button on the GitHub page.
-
-### 3. Open a terminal in the game folder
-
-- **Mac:** Open the **Terminal** app. Type `cd ` (with a space after it), drag the `church-family-feud` folder into the Terminal window, and press **Enter**.
-- **Windows:** Open the `church-family-feud` folder in File Explorer, click the address bar at the top, type `cmd`, and press **Enter**.
-
-> If you downloaded the whole project, the `church-family-feud` folder may be inside another folder. Open the folder that contains the `package.json` file.
-
-### 4. Install the game's parts (first time only)
-
-Type this and press **Enter**:
-
-```bash
-npm install
-```
-
-Wait for it to finish. It may take a minute.
-
-### 5. Start the game
-
-Type this and press **Enter**:
-
-```bash
-npm run dev
-```
-
-You'll see an address like `http://localhost:5173/`. Open that address in **Google Chrome** (recommended), then press **F** for fullscreen.
-
-To stop the game, go back to the terminal window and press **Ctrl + C**.
-
-**Next time**, you only need to repeat **step 3** (open a terminal in the folder) and **step 5** (`npm run dev`).
 
 ---
 
@@ -171,7 +98,7 @@ To stop the game, go back to the terminal window and press **Ctrl + C**.
 - [ ] Turn up the laptop volume (or connect speakers) if you want the sounds.
 - [ ] Press **R** on any round you tested so it starts out hidden.
 - [ ] Enter the team names and click **Reset team scores** in Host Edit mode so both teams start at 0.
-- [ ] If you're hosting from a phone: at the venue, run `npm run host`, open the host page on the phone, and check that revealing an answer on the phone shows up on the projector.
+- [ ] If you're hosting from a phone: at the venue, run `npm run host`, open the host page on the phone, and check that revealing an answer on the phone shows up on the projector (see the [Setup Guide](setup.md#part-3-control-the-game-from-the-phone)).
 - [ ] Turn off laptop sleep and keep the laptop plugged in.
 
 ### Projector tips
