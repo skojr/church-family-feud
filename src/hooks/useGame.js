@@ -1,5 +1,6 @@
 import defaultRounds, { isValidRounds, sortByVotes } from '../data/rounds'
 import { useLocalStorage } from './useLocalStorage'
+import { emit } from '../lib/hub'
 
 const cloneDefaults = () => structuredClone(defaultRounds)
 const isPlainObject = (v) => v !== null && typeof v === 'object' && !Array.isArray(v)
@@ -89,15 +90,25 @@ export function useGame() {
     if (next) reveal(next.id)
   }
 
-  const revealAll = () =>
+  // emit(): bulk actions also go to the buzzer hub as OSC cues. Single reveals,
+  // hides and strikes are reported by useHubLink on the board.
+  const revealAll = () => {
+    emit('revealall')
     updateState((s) => {
       const awarded = { ...s.awarded }
       for (const a of playable) if (!revealed.has(a.id)) awarded[a.id] = activeTeam
       return { revealed: playable.map((a) => a.id), awarded }
     })
+  }
 
-  const hideAll = () => updateState(() => ({ revealed: [], awarded: {} }))
-  const resetRound = () => updateState(() => ({ revealed: [], strikes: 0, awarded: {} }))
+  const hideAll = () => {
+    emit('hideall')
+    updateState(() => ({ revealed: [], awarded: {} }))
+  }
+  const resetRound = () => {
+    emit('reset')
+    updateState(() => ({ revealed: [], strikes: 0, awarded: {} }))
+  }
 
   const strike = () =>
     updateState((s) => ({

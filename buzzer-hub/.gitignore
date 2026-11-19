@@ -1,0 +1,4 @@
+node_modules
+firmware/buzzer_station/config.h
+osc.config.json
+teams.json

@@ -1,0 +1,114 @@
+/* Shared look for the LED pages (/banner, /small) and the control page.
+   ICGC · The Gathering '26 palette. Fonts are served by the hub, so the
+   screens work with no internet. */
+
+@font-face {
+  font-family: 'League Gothic';
+  src: url('/fonts/league-gothic-latin-400-normal.woff2') format('woff2');
+  font-weight: 400;
+  font-display: block;
+}
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/montserrat-latin-600-normal.woff2') format('woff2');
+  font-weight: 600;
+  font-display: block;
+}
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/montserrat-latin-800-normal.woff2') format('woff2');
+  font-weight: 800;
+  font-display: block;
+}
+
+:root {
+  --night: #1a0b33;
+  --plum: #2d1159;
+  --violet: #4604b1;
+  --violet-glow: #7902ff;
+  --coral: #ff7363;
+  --coral-deep: #e2553f;
+  --magenta: #df3c80;
+  --white: #ffffff;
+  --bg: var(--night);
+  --font-display: 'League Gothic', 'Anton', Impact, 'Arial Narrow Bold', sans-serif;
+  --font-body: 'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color-scheme: dark;
+}
+
+/* ?bg=black for keying in Resolume */
+:root.bg-black {
+  --bg: #000;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--white);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  cursor: none;
+}
+
+/* Text that is sized by display.js to fill its box. */
+.fit {
+  display: block;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.fit-box {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Offline notice: only shown when the page loses the hub. */
+.offline {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  padding: 0.3em 0.6em;
+  font: 800 clamp(8px, 2.2vmin, 18px) var(--font-body);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  background: #b81d2b;
+  color: #fff;
+}
+
+/* Score pop when the number changes */
+@keyframes pop {
+  0% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.pop {
+  animation: pop 0.5s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

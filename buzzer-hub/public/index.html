@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Buzzer Hub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=League+Gothic&family=Montserrat:wght@600;800&display=swap"
+    />
+    <link rel="stylesheet" href="/bell.css" />
+  </head>
+  <body>
+    <header class="top">
+      <div class="brand"><span class="brand__mark">ICGC</span> Buzzer Hub</div>
+      <div class="top__meta">
+        <span id="round" class="chip">Round 1</span>
+        <span id="hub" class="chip chip--bad"><i class="dot"></i>Hub offline</span>
+        <button id="sound" class="chip chip--btn" type="button">🔇 Click to enable sound</button>
+      </div>
+    </header>
+
+    <main class="stage">
+      <section class="station" data-station="A">
+        <div class="station__label">Station</div>
+        <div class="station__letter">A</div>
+        <div class="station__status chip"><i class="dot"></i><span>Offline</span></div>
+        <div class="station__delta"></div>
+      </section>
+
+      <div class="center">
+        <div id="banner" class="banner">
+          <div class="banner__kicker" id="kicker">Armed</div>
+          <div class="banner__title" id="title">Waiting for a buzz</div>
+          <div class="banner__sub" id="sub">First station to press wins</div>
+        </div>
+      </div>
+
+      <section class="station" data-station="B">
+        <div class="station__label">Station</div>
+        <div class="station__letter">B</div>
+        <div class="station__status chip"><i class="dot"></i><span>Offline</span></div>
+        <div class="station__delta"></div>
+      </section>
+    </main>
+
+    <footer class="bottom">
+      <div class="controls">
+        <button type="button" data-action="reset" class="btn btn--primary">Reset &amp; arm <kbd>Space</kbd></button>
+        <button type="button" data-action="lock" class="btn">Lock <kbd>L</kbd></button>
+        <button type="button" data-action="identify" data-station="A" class="btn">Blink A <kbd>1</kbd></button>
+        <button type="button" data-action="identify" data-station="B" class="btn">Blink B <kbd>2</kbd></button>
+        <button type="button" data-action="fullscreen" class="btn">Fullscreen <kbd>F</kbd></button>
+        <a class="btn" href="/sim" target="_blank" rel="noopener">Open simulator ↗</a>
+      </div>
+      <div class="controls" aria-label="Scoreboard and LED screens">
+        <a class="btn btn--primary" href="/control" target="_blank" rel="noopener">LED screens &amp; scores ↗</a>
+        <a class="btn" href="/banner" target="_blank" rel="noopener">LED banner ↗</a>
+        <a class="btn" href="/small" target="_blank" rel="noopener">LED small ↗</a>
+        <a class="btn" href="/small?team=A" target="_blank" rel="noopener">LED small · Team A ↗</a>
+        <a class="btn" href="/small?team=B" target="_blank" rel="noopener">LED small · Team B ↗</a>
+      </div>
+      <ol id="log" class="log"></ol>
+    </footer>
+
+    <script type="module" src="/bell.js"></script>
+  </body>
+</html>

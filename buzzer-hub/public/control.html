@@ -1,0 +1,345 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LED Screens &amp; Buzzers</title>
+    <link rel="stylesheet" href="/display.css" />
+    <style>
+      html,
+      body {
+        overflow: auto;
+        cursor: auto;
+        height: auto;
+        min-height: 100%;
+      }
+      body {
+        background:
+          radial-gradient(ellipse 60% 50% at 100% 0%, rgba(223, 60, 128, 0.25), transparent 60%),
+          radial-gradient(ellipse 60% 50% at 0% 100%, rgba(121, 2, 255, 0.3), transparent 65%),
+          var(--night);
+      }
+      .wrap {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 24px max(16px, 3vw) 48px;
+        display: grid;
+        gap: 22px;
+      }
+      header {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      h1 {
+        margin: 0;
+        font: 400 clamp(34px, 5vw, 52px) / 1 var(--font-display);
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+      }
+      h1 span {
+        color: var(--coral);
+      }
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+      .dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: #ff5a5a;
+      }
+      .chip.is-up .dot {
+        background: #3ddc84;
+      }
+      .label {
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.24em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.65);
+      }
+
+      .teams {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 18px;
+      }
+      .team {
+        display: grid;
+        gap: 14px;
+        padding: 18px;
+        border-radius: 16px;
+        background: rgba(45, 17, 89, 0.85);
+        border: 2px solid rgba(255, 255, 255, 0.1);
+        transition: border-color 0.2s, box-shadow 0.2s;
+      }
+      .team.is-first {
+        border-color: var(--coral);
+        box-shadow: 0 0 30px rgba(255, 115, 99, 0.4);
+      }
+      .team__top {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 8px;
+      }
+      .team__first {
+        visibility: hidden;
+        padding: 3px 10px;
+        border-radius: 999px;
+        background: var(--coral);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+      }
+      .team.is-first .team__first {
+        visibility: visible;
+      }
+      .team__name {
+        font: 800 22px var(--font-body);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        text-align: center;
+      }
+      .team__answering {
+        justify-self: center;
+        visibility: hidden;
+        padding: 4px 12px;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.4);
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+      }
+      .team.is-answering .team__answering {
+        visibility: visible;
+      }
+      .score {
+        font: 400 clamp(72px, 10vw, 110px) / 0.9 var(--font-display);
+        color: var(--coral);
+        text-align: center;
+        font-variant-numeric: tabular-nums;
+      }
+      button {
+        padding: 10px 8px;
+        border-radius: 10px;
+        border: 1px solid rgba(200, 170, 255, 0.3);
+        background: rgba(121, 2, 255, 0.28);
+        color: #fff;
+        font: 800 14px var(--font-body);
+        letter-spacing: 0.04em;
+        cursor: pointer;
+        transition: background 0.15s, transform 0.1s;
+      }
+      button:hover {
+        background: rgba(121, 2, 255, 0.6);
+      }
+      button:active {
+        transform: translateY(1px);
+      }
+      button:focus-visible {
+        outline: 3px solid var(--coral);
+        outline-offset: 2px;
+      }
+      button:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
+
+      .panel {
+        display: grid;
+        gap: 14px;
+        padding: 18px;
+        border-radius: 16px;
+        background: rgba(45, 17, 89, 0.6);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+      }
+      .buzz-state {
+        font: 400 34px / 1 var(--font-display);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-right: auto;
+      }
+      .links {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 8px;
+      }
+      .links a {
+        display: grid;
+        gap: 2px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.06);
+        color: #fff;
+        text-decoration: none;
+        font-weight: 800;
+        font-size: 14px;
+      }
+      .links a:hover {
+        background: rgba(255, 255, 255, 0.12);
+      }
+      .links small {
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.6);
+        font-size: 12px;
+        overflow-wrap: anywhere;
+      }
+      .note {
+        margin: 0;
+        font-size: 13px;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.65);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <h1>LED Screens <span>&amp; Buzzers</span></h1>
+        <div class="chips">
+          <span class="chip" id="board">Board —</span>
+          <span class="chip" id="hub"><i class="dot"></i><span>Hub offline</span></span>
+        </div>
+      </header>
+
+      <section class="teams" id="teams"></section>
+
+      <section class="panel" aria-label="Buzzers">
+        <div class="row">
+          <span class="label">Buzzers</span>
+        </div>
+        <div class="row">
+          <div class="buzz-state" id="buzz-state">—</div>
+          <button type="button" id="arm">Reset &amp; arm</button>
+          <button type="button" id="lock">Lock</button>
+        </div>
+      </section>
+
+      <section class="panel" aria-label="LED screens">
+        <span class="label">LED screens (open these in the browser you screen-capture into Resolume)</span>
+        <div class="links" id="links"></div>
+        <p class="note">Add <code>?bg=black</code> to any screen for a pure black background (for keying).</p>
+      </section>
+
+      <p class="note">
+        Team names and scores come from the game. Change them in the game's host page
+        (<code>/?view=host</code> on the game, Edit votes &amp; teams tab) or in Host Edit on the board. The LED
+        screens update by themselves.
+      </p>
+    </div>
+
+    <template id="team-tpl">
+      <article class="team">
+        <div class="team__top">
+          <span class="label"></span>
+          <span class="team__first">Buzzed first</span>
+        </div>
+        <div class="team__name"></div>
+        <div class="score">0</div>
+        <div class="team__answering">Answering</div>
+      </article>
+    </template>
+
+    <script type="module">
+      import { connectHub } from './hub-client.js'
+
+      const $ = (s) => document.querySelector(s)
+      const cards = {}
+      let state = null
+
+      const hub = connectHub({
+        hello: { type: 'hello', role: 'control' },
+        onStatus: (up) => {
+          $('#hub').classList.toggle('is-up', up)
+          $('#hub span').textContent = up ? 'Hub connected' : 'Hub offline'
+        },
+        onMessage: (msg) => {
+          if (msg.type === 'state') {
+            state = msg
+            render()
+          } else if (msg.type === 'board' && state) {
+            state.board = msg.board
+            render()
+          }
+        },
+      })
+
+      function makeCard(id, i) {
+        const el = $('#team-tpl').content.firstElementChild.cloneNode(true)
+        el.querySelector('.label').textContent = `Team ${i + 1} · Buzzer ${id}`
+        $('#teams').append(el)
+        return el
+      }
+
+      function render() {
+        const ids = Object.keys(state.teams)
+        ids.forEach((id, i) => {
+          const t = state.teams[id]
+          const el = (cards[id] ||= makeCard(id, i))
+          el.querySelector('.team__name').textContent = t.name
+          el.querySelector('.score').textContent = t.score
+          el.classList.toggle('is-first', state.winner === id)
+          el.classList.toggle('is-answering', state.answering === id)
+        })
+
+        const b = state.board
+        $('#board').textContent = b?.round ? `Round ${b.round} · Board ${b.score} pts` : 'Game not connected'
+
+        const winner = state.winner && state.teams[state.winner]
+        $('#buzz-state').textContent = winner
+          ? `${winner.name} buzzed first`
+          : state.armed
+            ? 'Ready — waiting for a buzz'
+            : 'Locked'
+
+        const links = [
+          ['Long banner', '/banner'],
+          ['Small screen (both teams)', '/small'],
+          ...ids.map((id) => [`Small screen (${state.teams[id].name} only)`, `/small?team=${id}`]),
+        ]
+        $('#links').innerHTML = ''
+        for (const [label, href] of links) {
+          const a = document.createElement('a')
+          a.href = href
+          a.target = '_blank'
+          a.rel = 'noopener'
+          const s = document.createElement('small')
+          s.textContent = `${location.origin}${href}`
+          a.append(label, s)
+          $('#links').append(a)
+        }
+      }
+
+      $('#arm').addEventListener('click', () => hub.send({ type: 'reset' }))
+      $('#lock').addEventListener('click', () => hub.send({ type: 'lock' }))
+
+    </script>
+  </body>
+</html>

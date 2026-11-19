@@ -1,0 +1,290 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LED Small · Buzz In</title>
+    <link rel="stylesheet" href="/display.css" />
+    <style>
+      /* Small LED screen: team points + who buzzed first, game-show style.
+         /small          both teams with a status strip on top
+         /small?team=A   one team only (e.g. a podium screen)
+         Everything scales from the window; landscape puts teams side by side,
+         portrait stacks them. */
+      body {
+        background:
+          radial-gradient(ellipse 70% 70% at 50% 40%, rgba(121, 2, 255, 0.35), transparent 70%),
+          var(--bg);
+      }
+      :root.bg-black body {
+        background: #000;
+      }
+
+      .screen {
+        --gap: max(2px, 1.8vmin);
+        height: 100vh;
+        display: grid;
+        grid-template-rows: 20fr 80fr;
+        gap: var(--gap);
+        padding: var(--gap);
+      }
+      .screen.is-single {
+        grid-template-rows: 1fr;
+      }
+      .screen.is-single .status {
+        display: none;
+      }
+
+      /* ---- status strip ---- */
+      .status {
+        border-radius: min(2vmin, 16px);
+        background: var(--plum);
+        transition: background 0.25s;
+      }
+      .status .fit {
+        font-family: var(--font-display);
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+      }
+      .screen[data-mode='ready'] .status {
+        animation: breathe 2.4s ease-in-out infinite;
+      }
+      .screen[data-mode='first'] .status {
+        background: var(--coral);
+        animation: flash 0.32s steps(1) 6;
+      }
+      .screen[data-mode='locked'] .status {
+        background: #241044;
+        color: rgba(255, 255, 255, 0.55);
+      }
+
+      @keyframes breathe {
+        50% {
+          background: var(--violet);
+        }
+      }
+      @keyframes flash {
+        50% {
+          background: #fff;
+          color: var(--coral-deep);
+        }
+      }
+
+      /* ---- team tiles ---- */
+      .tiles {
+        display: grid;
+        grid-auto-flow: column;
+        grid-auto-columns: 1fr;
+        gap: var(--gap);
+        min-height: 0;
+      }
+      @media (max-aspect-ratio: 9/10) {
+        .tiles {
+          grid-auto-flow: row;
+          grid-auto-rows: 1fr;
+        }
+      }
+
+      .tile {
+        position: relative;
+        display: grid;
+        grid-template-rows: 24fr 76fr;
+        min-width: 0;
+        min-height: 0;
+        border-radius: min(3vmin, 22px);
+        background: linear-gradient(180deg, var(--violet) 0%, var(--plum) 100%);
+        overflow: hidden;
+        transition: opacity 0.3s, filter 0.3s, background 0.3s;
+      }
+      .tile__inner {
+        position: absolute;
+        inset: var(--bulb-band, 6%);
+        display: grid;
+        grid-template-rows: 24fr 76fr;
+        min-height: 0;
+      }
+      .tile__name .fit {
+        font-family: var(--font-body);
+        font-weight: 800;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.85);
+      }
+      .tile__score .fit {
+        font-family: var(--font-display);
+        font-variant-numeric: tabular-nums;
+        color: var(--coral);
+        text-shadow: 0 0.035em 0 rgba(0, 0, 0, 0.35);
+      }
+
+      /* Buzzed first */
+      .tile.is-first {
+        background: linear-gradient(180deg, var(--coral) 0%, var(--coral-deep) 100%);
+        animation: tileFlash 0.32s steps(1) 6;
+      }
+      .tile.is-first .tile__score .fit,
+      .tile.is-first .tile__name .fit {
+        color: #fff;
+      }
+      .tile.is-out {
+        opacity: 0.32;
+        filter: saturate(0.4);
+      }
+      .screen[data-mode='locked'] .tile {
+        opacity: 0.55;
+      }
+      @keyframes tileFlash {
+        50% {
+          background: #fff;
+        }
+      }
+      .tile.is-first .tile__score .fit {
+        animation: scoreFlash 0.32s steps(1) 6;
+      }
+      @keyframes scoreFlash {
+        50% {
+          color: var(--coral-deep);
+        }
+      }
+
+      /* ---- marquee bulbs (placed by script around each tile) ---- */
+      .bulb {
+        position: absolute;
+        width: var(--d);
+        height: var(--d);
+        margin: calc(var(--d) / -2) 0 0 calc(var(--d) / -2);
+        border-radius: 50%;
+        background: rgba(255, 220, 200, 0.22);
+        animation: chase var(--speed, 1.8s) steps(1) infinite;
+        animation-delay: calc(var(--speed, 1.8s) / -3 * var(--k));
+      }
+      @keyframes chase {
+        0% {
+          background: #fff3e6;
+          box-shadow: 0 0 calc(var(--d) * 0.9) rgba(255, 220, 190, 0.85);
+        }
+        33.333% {
+          background: rgba(255, 220, 200, 0.22);
+          box-shadow: none;
+        }
+      }
+      .tile.is-first .bulb {
+        --speed: 0.45s;
+      }
+      .tile.is-out .bulb,
+      .screen[data-mode='locked'] .bulb {
+        animation: none;
+      }
+      .tile.is-first .bulb {
+        animation-name: chaseHot;
+      }
+      @keyframes chaseHot {
+        0% {
+          background: #fff;
+          box-shadow: 0 0 var(--d) #fff;
+        }
+        33.333% {
+          background: rgba(120, 20, 30, 0.45);
+          box-shadow: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="screen" data-mode="ready">
+      <div class="status fit-box"><span class="fit" id="status" data-fit-h="0.72">Ready</span></div>
+      <div class="tiles" id="tiles"></div>
+    </main>
+
+    <template id="tile-tpl">
+      <section class="tile">
+        <div class="tile__inner">
+          <div class="tile__name fit-box"><span class="fit" data-fit-h="0.6" data-fit-w="0.9">Team</span></div>
+          <div class="tile__score fit-box" data-pop><span class="fit score" data-fit-h="0.92" data-fit-w="0.88">0</span></div>
+        </div>
+      </section>
+    </template>
+
+    <script type="module">
+      import { connectDisplay, fitAll, param, setScore, setText, teamIds, watchFit } from './display.js'
+
+      const only = (param('team') || '').toUpperCase()
+      const ids = teamIds.includes(only) ? [only] : teamIds
+      const screen = document.querySelector('.screen')
+      screen.classList.toggle('is-single', ids.length === 1)
+
+      const tiles = Object.fromEntries(
+        ids.map((id) => {
+          const el = document.querySelector('#tile-tpl').content.firstElementChild.cloneNode(true)
+          el.dataset.team = id
+          document.querySelector('#tiles').append(el)
+          return [id, el]
+        }),
+      )
+
+      // Bulbs around each tile, spaced from its size so they stay round and
+      // readable on a coarse LED pitch.
+      function placeBulbs() {
+        for (const tile of Object.values(tiles)) {
+          tile.querySelectorAll('.bulb').forEach((b) => b.remove())
+          const w = tile.clientWidth
+          const h = tile.clientHeight
+          const m = Math.min(w, h)
+          const step = Math.max(10, m * 0.085)
+          const d = Math.max(3, step * 0.42)
+          const inset = step * 0.55
+          tile.style.setProperty('--bulb-band', `${inset * 2}px`)
+          const iw = w - inset * 2
+          const ih = h - inset * 2
+          const nx = Math.max(2, Math.round(iw / step))
+          const ny = Math.max(2, Math.round(ih / step))
+          const pts = []
+          for (let i = 0; i < nx; i++) pts.push([inset + (iw * i) / nx, inset])
+          for (let i = 0; i < ny; i++) pts.push([inset + iw, inset + (ih * i) / ny])
+          for (let i = 0; i < nx; i++) pts.push([inset + iw - (iw * i) / nx, inset + ih])
+          for (let i = 0; i < ny; i++) pts.push([inset, inset + ih - (ih * i) / ny])
+          const frag = document.createDocumentFragment()
+          pts.forEach(([x, y], i) => {
+            const b = document.createElement('i')
+            b.className = 'bulb'
+            b.style.cssText = `left:${x}px;top:${y}px;--d:${d}px;--k:${i % 3}`
+            frag.append(b)
+          })
+          tile.append(frag)
+        }
+        fitAll()
+      }
+      new ResizeObserver(placeBulbs).observe(document.querySelector('#tiles'))
+      watchFit()
+
+      let lastWinner = null
+      connectDisplay('small', (state) => {
+        for (const [id, el] of Object.entries(tiles)) {
+          const t = state.teams?.[id]
+          if (!t) continue
+          setText(el.querySelector('.tile__name .fit'), t.name)
+          setScore(el.querySelector('.score'), t.score)
+          el.classList.toggle('is-first', state.winner === id)
+          el.classList.toggle('is-out', Boolean(state.winner) && state.winner !== id)
+        }
+
+        const mode = state.winner ? 'first' : state.armed ? 'ready' : 'locked'
+        if (screen.dataset.mode !== mode || state.winner !== lastWinner) {
+          screen.dataset.mode = mode
+          // restart the flash for a new winner
+          screen.querySelectorAll('.status, .tile.is-first, .tile.is-first .score').forEach((n) => {
+            n.style.animation = 'none'
+            void n.offsetWidth
+            n.style.animation = ''
+          })
+        }
+        lastWinner = state.winner
+        const w = state.winner && state.teams?.[state.winner]
+        setText(
+          document.querySelector('#status'),
+          w ? `${w.name} first!` : mode === 'ready' ? 'Buzzers ready' : 'Buzzers locked',
+        )
+      })
+    </script>
+  </body>
+</html>

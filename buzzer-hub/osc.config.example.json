@@ -1,0 +1,7 @@
+{
+  "enabled": true,
+  "prefix": "/feud",
+  "targets": [
+    { "name": "Show computer", "host": "127.0.0.1", "port": 53000, "enabled": true }
+  ]
+}

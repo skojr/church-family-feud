@@ -115,6 +115,24 @@ The game always draws a 16:9 board and scales it to fit the screen, so it looks 
 
 ---
 
+## Buzzers, LED screens and OSC cues
+
+The `buzzer-hub` folder is a separate small program for the extras. Run it alongside the game:
+
+```bash
+cd buzzer-hub
+npm install
+npm start
+```
+
+- **Buzzers:** two ESP32 buzzer stations. The first team to buzz becomes the answering team on the board automatically.
+- **LED screens for Resolume:** a long banner with team names and scores, and a small "who buzzed first" screen, at `http://localhost:8090/control`.
+- **OSC cues** to QLab, Resolume, Companion and similar apps on every reveal, strike, round change and buzz.
+
+Setup, wiring and the full OSC list are in [buzzer-hub/README.md](buzzer-hub/README.md).
+
+---
+
 ## For developers
 
 - Built with React, Vite, and plain CSS. The icons come from `lucide-react`.

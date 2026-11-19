@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Station Simulator</title>
+    <link rel="stylesheet" href="/bell.css" />
+    <style>
+      body {
+        grid-template-rows: auto 1fr;
+        overflow: auto;
+      }
+      .sims {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 24px;
+        padding: 0 clamp(16px, 4vw, 48px) 32px;
+        align-content: center;
+      }
+      .sim {
+        display: grid;
+        justify-items: center;
+        gap: 16px;
+        padding: 28px 16px;
+        border-radius: 24px;
+        border: 2px solid rgba(177, 138, 255, 0.35);
+        background: linear-gradient(180deg, rgba(70, 4, 177, 0.45), rgba(26, 11, 51, 0.6));
+      }
+      .sim h2 {
+        margin: 0;
+        font-family: var(--font-display);
+        font-weight: 400;
+        font-size: 44px;
+        letter-spacing: 0.04em;
+      }
+      /* the "arcade button" — its glow mirrors the LED command the hub sends */
+      .arcade {
+        width: min(200px, 50vw);
+        aspect-ratio: 1;
+        border-radius: 50%;
+        border: 10px solid #2a1650;
+        background: radial-gradient(circle at 40% 35%, #6b4a3c, #3a1f18 70%);
+        color: rgba(255, 255, 255, 0.85);
+        font: 800 16px var(--font-body);
+        letter-spacing: 0.2em;
+        cursor: pointer;
+        transition: transform 0.06s, box-shadow 0.2s, background 0.2s;
+      }
+      .arcade:active {
+        transform: scale(0.94);
+      }
+      .arcade:disabled {
+        cursor: not-allowed;
+        opacity: 0.4;
+      }
+      .arcade[data-led='ready'] {
+        animation: breathe 2s ease-in-out infinite;
+      }
+      .arcade[data-led='win'] {
+        background: radial-gradient(circle at 40% 35%, #ffd0c8, var(--coral) 60%);
+        box-shadow: 0 0 60px var(--coral);
+        color: var(--night);
+      }
+      .arcade[data-led='identify'] {
+        animation: blink 0.3s steps(2) 6;
+      }
+      @keyframes breathe {
+        0%,
+        100% {
+          background: radial-gradient(circle at 40% 35%, #a8645a, #5a2a22 70%);
+          box-shadow: 0 0 12px rgba(255, 115, 99, 0.3);
+        }
+        50% {
+          background: radial-gradient(circle at 40% 35%, #ffb3a8, var(--coral) 70%);
+          box-shadow: 0 0 50px rgba(255, 115, 99, 0.8);
+        }
+      }
+      @keyframes blink {
+        50% {
+          background: #fff;
+          box-shadow: 0 0 60px #fff;
+        }
+      }
+      .led {
+        font-size: 13px;
+        color: var(--soft);
+        font-weight: 600;
+      }
+      .note {
+        max-width: 720px;
+        margin: 0 auto 20px;
+        padding: 0 16px;
+        text-align: center;
+        color: var(--soft);
+        font-size: 14px;
+        line-height: 1.5;
+      }
+    </style>
+  </head>
+  <body>
+    <header class="top">
+      <div class="brand"><span class="brand__mark">ICGC</span> Station Simulator</div>
+      <a class="chip" href="/" target="_blank" rel="noopener">Open bell screen ↗</a>
+    </header>
+    <div>
+      <p class="note">
+        Each card pretends to be an ESP32 station. Turn one on, then click its button (or press
+        <kbd>A</kbd> / <kbd>B</kbd>). Press both keys at once to race them. If a real station with
+        the same letter is connected, turning the simulator on takes its place until you turn it off.
+      </p>
+      <div class="sims" id="sims"></div>
+    </div>
+
+    <script type="module">
+      import { connectHub } from '/hub-client.js'
+
+      const sims = {}
+      const root = document.getElementById('sims')
+
+      for (const id of ['A', 'B']) {
+        const card = document.createElement('section')
+        card.className = 'sim'
+        card.innerHTML = `
+          <h2>Station ${id}</h2>
+          <label class="chip chip--btn"><input type="checkbox"> Simulate this station</label>
+          <button class="arcade" disabled>PRESS</button>
+          <div class="led">LED: off (not connected)</div>`
+        root.append(card)
+
+        const toggle = card.querySelector('input')
+        const button = card.querySelector('.arcade')
+        const ledText = card.querySelector('.led')
+        let conn = null
+        let identifyTimer
+
+        const setLed = (mode) => {
+          button.dataset.led = mode
+          ledText.textContent = `LED: ${mode}`
+        }
+
+        toggle.addEventListener('change', () => {
+          if (toggle.checked) {
+            conn = connectHub({
+              hello: { type: 'hello', role: 'station', station: id, sim: true, fw: 'sim' },
+              onStatus(ok) {
+                button.disabled = !ok
+                if (!ok) setLed('offline')
+              },
+              onRejected() {
+                toggle.checked = false
+                conn = null
+                button.disabled = true
+                delete button.dataset.led
+                ledText.textContent = `Off: the real Station ${id} is connected`
+              },
+              onMessage(msg) {
+                if (msg.type !== 'led') return
+                if (msg.mode === 'identify') {
+                  const back = button.dataset.led
+                  setLed('identify')
+                  clearTimeout(identifyTimer)
+                  identifyTimer = setTimeout(() => setLed(back), 1800)
+                } else setLed(msg.mode)
+              },
+            })
+          } else {
+            conn?.close()
+            conn = null
+            button.disabled = true
+            delete button.dataset.led
+            ledText.textContent = 'LED: off (not connected)'
+          }
+        })
+
+        const press = () => conn?.send({ type: 'press', station: id })
+        button.addEventListener('pointerdown', press)
+        sims[id.toLowerCase()] = press
+      }
+
+      window.addEventListener('keydown', (e) => {
+        if (e.repeat) return
+        sims[e.key.toLowerCase()]?.()
+      })
+    </script>
+  </body>
+</html>

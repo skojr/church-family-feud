@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useGame } from './hooks/useGame'
+import { useHubLink } from './hooks/useHubLink'
 import { useFullscreen } from './hooks/useFullscreen'
 import { playReveal, playStrike } from './lib/sounds'
 import Brand from './components/Brand'
@@ -13,6 +14,7 @@ import './App.css'
 
 export default function App() {
   const game = useGame()
+  useHubLink(game)
   const { rounds, roundIndex, round, state, revealed, answers, soundOn } = game
   const [hostMode, setHostMode] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
