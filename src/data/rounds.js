@@ -142,4 +142,14 @@ export function isValidRounds(value) {
   )
 }
 
+// Highest votes first; blank slots always sink to the bottom. Ties keep their original order.
+export function sortByVotes(answers) {
+  return [...answers].sort((a, b) => {
+    const aBlank = !a.text.trim()
+    const bBlank = !b.text.trim()
+    if (aBlank !== bBlank) return aBlank ? 1 : -1
+    return (Number(b.votes) || 0) - (Number(a.votes) || 0)
+  })
+}
+
 export default rounds

@@ -11,7 +11,7 @@ export default function Brand() {
     <div className="brand">
       <div className="brand__rays" aria-hidden="true" />
       <h1 className="brand__title">
-        <span className="brand__igc">IGC</span>
+        <span className="brand__icgc">ICGC</span>
         <span className="brand__edition">
           <span>Gathering</span>
           <span>Edition</span>

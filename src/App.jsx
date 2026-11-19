@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import defaultRounds, { isValidRounds } from './data/rounds'
+import defaultRounds, { isValidRounds, sortByVotes } from './data/rounds'
 import { useLocalStorage } from './hooks/useLocalStorage'
 import { useFullscreen } from './hooks/useFullscreen'
 import { playReveal, playStrike } from './lib/sounds'
@@ -29,7 +29,8 @@ export default function App() {
   const round = rounds[roundIndex]
   const state = roundState[round.id] ?? { revealed: [], strikes: 0 }
   const revealed = new Set(state.revealed)
-  const playable = round.answers.filter((a) => a.text.trim())
+  const answers = sortByVotes(round.answers)
+  const playable = answers.filter((a) => a.text.trim())
   const score = playable.filter((a) => revealed.has(a.id)).reduce((s, a) => s + a.votes, 0)
 
   const updateState = (patch) =>
@@ -98,7 +99,7 @@ export default function App() {
 
       const key = e.key.length === 1 ? e.key.toLowerCase() : e.key
       if (key >= '1' && key <= '6') {
-        const answer = round.answers[Number(key) - 1]
+        const answer = answers[Number(key) - 1]
         if (answer) reveal(answer.id)
         return
       }
@@ -163,7 +164,7 @@ export default function App() {
 
         <section className="board-frame">
           <div className="board" key={`b-${round.id}`}>
-            {round.answers.map((answer, i) => (
+            {answers.map((answer, i) => (
               <AnswerCard
                 key={answer.id}
                 number={i + 1}

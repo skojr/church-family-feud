@@ -37,7 +37,7 @@ Small reusable pieces of logic used by `App.jsx`.
 
 | File | What it is |
 | --- | --- |
-| `rounds.js` | The default questions for all 10 rounds. Each round has a `question` and exactly 6 `answers`, and each answer has `text` and `votes`. Edit this file to change the built-in questions. Leaving an answer's `text` empty (`""`) makes that slot blank and unclickable. |
+| `rounds.js` | The default questions for all 10 rounds. Each round has a `question` and exactly 6 `answers`, and each answer has `text` and `votes`. Edit this file to change the built-in questions. Leaving an answer's `text` empty (`""`) makes that slot blank and unclickable. Also exports `sortByVotes`, which the board and host editor use to list answers from most to fewest votes (blank slots last). |
 
 Changes made in Host Edit mode are saved in the browser and **override** this file. To go back to the contents of `rounds.js`, use **Restore all defaults** in the host editor.
 

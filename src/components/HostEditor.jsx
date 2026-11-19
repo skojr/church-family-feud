@@ -1,4 +1,36 @@
+import { useState } from 'react'
 import { RotateCcw, X } from 'lucide-react'
+import { sortByVotes } from '../data/rounds'
+
+// Keeps its own text so the field can be cleared while typing; an empty field counts as 0 votes.
+function VotesInput({ votes, onChange }) {
+  const [draft, setDraft] = useState(String(votes))
+  const [lastVotes, setLastVotes] = useState(votes)
+
+  if (votes !== lastVotes) {
+    setLastVotes(votes)
+    if (Number(draft || 0) !== votes) setDraft(String(votes))
+  }
+
+  return (
+    <input
+      type="text"
+      inputMode="numeric"
+      pattern="[0-9]*"
+      className="editor__votes"
+      value={draft}
+      placeholder="0"
+      onChange={(e) => {
+        const digits = e.target.value.replace(/\D/g, '').replace(/^0+(?=\d)/, '')
+        setDraft(digits)
+        onChange(Number(digits || 0))
+      }}
+      onBlur={() => {
+        if (!draft) setDraft('0')
+      }}
+    />
+  )
+}
 
 export default function HostEditor({
   round,
@@ -11,6 +43,12 @@ export default function HostEditor({
   onClose,
 }) {
   const total = round.answers.reduce((sum, a) => sum + (Number(a.votes) || 0), 0)
+
+  // Rows would jump mid-keystroke if re-sorted live, so the order is frozen while focus is in the list.
+  const [frozenOrder, setFrozenOrder] = useState(null)
+  const answers = frozenOrder
+    ? frozenOrder.map((id) => round.answers.find((a) => a.id === id)).filter(Boolean)
+    : sortByVotes(round.answers)
 
   return (
     <aside className="editor" aria-label="Host editor">
@@ -35,13 +73,19 @@ export default function HostEditor({
         />
       </label>
 
-      <div className="editor__answers">
+      <div
+        className="editor__answers"
+        onFocus={() => setFrozenOrder((prev) => prev ?? answers.map((a) => a.id))}
+        onBlur={(e) => {
+          if (!e.currentTarget.contains(e.relatedTarget)) setFrozenOrder(null)
+        }}
+      >
         <div className="editor__row editor__row--head">
           <span>#</span>
           <span>Answer</span>
           <span>Votes</span>
         </div>
-        {round.answers.map((a, i) => (
+        {answers.map((a, i) => (
           <div className="editor__row" key={a.id}>
             <span className="editor__num">{i + 1}</span>
             <input
@@ -50,15 +94,7 @@ export default function HostEditor({
               placeholder="(blank slot)"
               onChange={(e) => onChangeAnswer(a.id, { text: e.target.value })}
             />
-            <input
-              type="number"
-              min="0"
-              inputMode="numeric"
-              value={a.votes}
-              onChange={(e) =>
-                onChangeAnswer(a.id, { votes: Math.max(0, parseInt(e.target.value, 10) || 0) })
-              }
-            />
+            <VotesInput votes={a.votes} onChange={(votes) => onChangeAnswer(a.id, { votes })} />
           </div>
         ))}
         <div className="editor__total">
