@@ -100,6 +100,7 @@ npm run host    # laptop + phone control
 - [ ] Enter the team names and click **Reset team scores** in Host Edit mode so both teams start at 0.
 - [ ] If you're hosting from a phone: at the venue, run `npm run host`, open the host page on the phone, and check that revealing an answer on the phone shows up on the projector (see the [Setup Guide](setup.md#part-3-control-the-game-from-the-phone)).
 - [ ] Turn off laptop sleep and keep the laptop plugged in.
+- [ ] For a full run-through of every screen and control, work through the [UI test plan](docs/test-plan.md).
 
 ### Projector tips
 
