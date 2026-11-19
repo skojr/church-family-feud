@@ -1,6 +1,8 @@
-# IGC Gathering Edition — Family Feud
+# ICGC Gathering Edition — Family Feud
 
-A Family Feud–style game show board made for the IGC church gathering. It runs on a laptop and is meant to be shown on a projector or large screen. You don't need the internet once it's set up.
+A Family Feud–style game show board made for the ICGC church gathering. It runs on a laptop and is meant to be shown on a projector or large screen. You don't need the internet once it's set up.
+
+![ICGC Gathering Edition game board](docs/screenshot.png)
 
 ---
 
@@ -8,7 +10,7 @@ A Family Feud–style game show board made for the IGC church gathering. It runs
 
 ### What the audience sees
 
-- The **IGC Gathering Edition** title at the top, with the **round number** on the left and the **points** for the current round on the right.
+- The **ICGC Gathering Edition** title at the top, with the **round number** on the left and the **points** for the current round on the right.
 - The **question** for the round in a banner across the screen.
 - A board with **six numbered answer slots**. Answers stay hidden until the host reveals them.
 - When the host reveals an answer, the slot **flips over** with a chime and shows the answer and how many people voted for it. The points box adds those votes to the round total.

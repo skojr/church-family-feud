@@ -1,6 +1,6 @@
 # `src` — Source Code Overview
 
-This folder contains all of the code for the IGC Gathering Edition Family Feud game. It is a small React app with no backend: everything runs in the browser, and saved changes live in the browser's `localStorage`.
+This folder contains all of the code for the ICGC Gathering Edition Family Feud game. It is a small React app with no backend: everything runs in the browser, and saved changes live in the browser's `localStorage`.
 
 ## Top-level files
 
@@ -17,8 +17,8 @@ Each component is one visual piece of the screen. They receive data and callback
 
 | Component | What it represents |
 | --- | --- |
-| `Brand.jsx` | The "IGC GATHERING EDITION" title with the orange "FAMILY FEUD" ribbon and the rotating light rays behind it. |
-| `AnswerCard.jsx` | One answer row on the board. The front shows the number badge and a hidden panel. The back shows the answer text and its vote count. Clicking it flips between the two. |
+| `Brand.jsx` | The "ICGC GATHERING EDITION" title with the orange "FAMILY FEUD" ribbon and the rotating light rays behind it. |
+| `AnswerCard.jsx` | One answer row on the board. The front shows the number badge and a panel labeled "ICGC: The Gathering". The back shows the answer text and its vote count. Clicking it flips between the two. |
 | `HostControls.jsx` | The row of buttons along the bottom (Prev, Reset, Hide All, Reveal All, Strike, Next, Sound, Host Edit, Keys, Fullscreen). |
 | `HostEditor.jsx` | The slide-out side panel used in Host Edit mode to change the question, answers, and vote counts for the current round, or restore the defaults. |
 | `StrikeOverlay.jsx` | The big red ✕ marks that flash across the screen when the host adds a strike. |
