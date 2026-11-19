@@ -1,8 +1,10 @@
 # ICGC Gathering Edition — Family Feud
 
+> **New here? Start with the [Setup Guide](setup.md).** It walks you through installing, starting the game on a laptop, and controlling it from a phone.
+
 A Family Feud–style game show board made for the ICGC church gathering. It runs on a laptop and is meant to be shown on a projector or large screen. You don't need the internet once it's set up.
 
-![ICGC Gathering Edition game board](docs/screenshot.png)
+![The Gathering ’26 Family Feud game board](docs/screenshot.png)
 
 ---
 
