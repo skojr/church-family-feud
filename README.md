@@ -41,7 +41,7 @@ The buttons along the bottom stay faded so they don't distract the audience. Mov
 | **← / →** | Previous / next round |
 | **1 – 6** | Reveal that answer |
 | **Space** | Reveal the next hidden answer |
-| **A** | Reveal all answers |
+| **A** | Reveal all answers (the newly shown answers score no points) |
 | **H** | Hide all answers |
 | **R** | Reset the round (hides answers and clears strikes) |
 | **X** | Add a strike |

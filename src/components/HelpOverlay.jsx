@@ -2,7 +2,7 @@ const SHORTCUTS = [
   ['← / →', 'Previous / next round'],
   ['1 – 6', 'Reveal that answer'],
   ['Space', 'Reveal next hidden answer'],
-  ['A', 'Reveal all answers'],
+  ['A', 'Reveal all answers (no points)'],
   ['H', 'Hide all answers'],
   ['R', 'Reset round (answers + strikes)'],
   ['X', 'Strike (wrong answer)'],

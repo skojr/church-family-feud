@@ -53,7 +53,7 @@ Stay on Round 1 with **Team 1** answering.
 - [ ] 3.7 Press **1** again. **Expected:** slot 1 is revealed again and credited to **Team 2**, which is answering now.
 - [ ] 3.8 Press **Space** repeatedly until all answers are shown, then once more. **Expected:** each press reveals the next hidden answer. The extra press does nothing and nothing breaks.
 - [ ] 3.9 Press **H** (Hide all). **Expected:** every slot flips back to hidden and both teams' **This round** goes back to 0. Their totals drop by the same amounts.
-- [ ] 3.10 With Team 1 answering, reveal slot 2, then press **A** (Reveal all). **Expected:** all remaining answers flip over and their votes go to Team 1. Slot 2 keeps its original credit.
+- [ ] 3.10 With Team 1 answering, reveal slot 2, then press **A** (Reveal all). **Expected:** all remaining answers flip over without adding any points. Slot 2 keeps its original credit, so Team 1's score only includes slot 2.
 - [ ] 3.11 Press **R** (Reset round). **Expected:** all answers hide, strikes clear, and this round's points are removed from both teams.
 
 ---

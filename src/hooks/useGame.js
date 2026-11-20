@@ -104,13 +104,10 @@ export function useGame() {
 
   // emit(): bulk actions also go to the buzzer hub as OSC cues. Single reveals,
   // hides and strikes are reported by useHubLink on the board.
+  // Shows the rest of the board without scoring it; answers already revealed keep their points.
   const revealAll = () => {
     emit('revealall')
-    updateState((s) => {
-      const awarded = { ...s.awarded }
-      for (const a of playable) if (!revealed.has(a.id)) awarded[a.id] = activeTeam
-      return { revealed: playable.map((a) => a.id), awarded }
-    })
+    updateState(() => ({ revealed: playable.map((a) => a.id) }))
   }
 
   const hideAll = () => {
