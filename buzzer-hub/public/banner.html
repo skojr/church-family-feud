@@ -140,9 +140,31 @@
     </main>
 
     <script type="module">
-      import { connectDisplay, setScore, setText, watchFit } from './display.js'
+      import { connectDisplay, play, setScore, setText, watchFit } from './display.js'
 
       watchFit()
+      const team = (id) => document.querySelector(`.team[data-team="${id}"]`)
+
+      // Game moments: subtle one-shot animations on top of the scores.
+      function onMoment({ event, args, answering }) {
+        if (event === 'strike' && answering) {
+          const cls = Number(args[0]) >= 3 ? 'is-strike3' : 'is-strike'
+          for (const part of team(answering)?.querySelectorAll('.team__name, .team__score') ?? []) {
+            play(part, cls, 1700)
+          }
+        } else if (event === 'reveal' && answering) {
+          play(team(answering)?.querySelector('.team__score'), 'shine', 900)
+        } else if (event === 'steal') {
+          const to = args[0] === 'B' ? 'B' : 'A'
+          const from = to === 'A' ? 'B' : 'A'
+          for (const part of team(to)?.querySelectorAll('.team__name, .team__score') ?? []) {
+            play(part, 'is-steal', 2200)
+            play(part, 'shine', 900)
+          }
+          play(team(from), 'is-robbed', 2200)
+        }
+      }
+
       connectDisplay('banner', (state) => {
         for (const el of document.querySelectorAll('.team')) {
           const t = state.teams?.[el.dataset.team]
@@ -151,7 +173,7 @@
           setScore(el.querySelector('.score'), t.score)
           el.classList.toggle('is-first', state.winner === el.dataset.team)
         }
-      })
+      }, onMoment)
     </script>
   </body>
 </html>

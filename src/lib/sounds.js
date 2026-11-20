@@ -61,3 +61,24 @@ export function playStrike() {
   tone(c, { freq: 116, start: t, duration: 0.4, type: 'square', peak: 0.05 })
   tone(c, { freq: 110, start: t, duration: 0.4, type: 'sawtooth', peak: 0.075 })
 }
+
+// Steal: a quick rising sweep into a bright major chord.
+export function playSteal() {
+  const c = audio()
+  if (!c) return
+  const t = c.currentTime
+  const sweep = c.createOscillator()
+  const g = c.createGain()
+  sweep.type = 'triangle'
+  sweep.frequency.setValueAtTime(220, t)
+  sweep.frequency.exponentialRampToValueAtTime(880, t + 0.28)
+  g.gain.setValueAtTime(0.0001, t)
+  g.gain.exponentialRampToValueAtTime(0.12, t + 0.05)
+  g.gain.exponentialRampToValueAtTime(0.0001, t + 0.32)
+  sweep.connect(g).connect(c.destination)
+  sweep.start(t)
+  sweep.stop(t + 0.35)
+  for (const [freq, delay] of [[659.25, 0], [830.6, 0.05], [987.8, 0.1], [1318.5, 0.15]]) {
+    bell(c, { freq, start: t + 0.3 + delay, duration: 1.3, peak: 0.13 })
+  }
+}

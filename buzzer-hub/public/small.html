@@ -58,6 +58,12 @@
         color: rgba(255, 255, 255, 0.55);
       }
 
+      /* Moment messages in the status strip (strike, steal) */
+      .screen[data-moment='steal'] .status {
+        background: linear-gradient(90deg, var(--magenta), var(--coral));
+        animation: flash 0.35s steps(1) 4;
+      }
+
       @keyframes breathe {
         50% {
           background: var(--violet);
@@ -206,7 +212,7 @@
     </template>
 
     <script type="module">
-      import { connectDisplay, fitAll, param, setScore, setText, teamIds, watchFit } from './display.js'
+      import { connectDisplay, fitAll, param, play, setScore, setText, teamIds, watchFit } from './display.js'
 
       const only = (param('team') || '').toUpperCase()
       const ids = teamIds.includes(only) ? [only] : teamIds
@@ -258,7 +264,42 @@
       watchFit()
 
       let lastWinner = null
-      connectDisplay('small', (state) => {
+      let lastState = null
+      let momentTimer
+      const statusEl = document.querySelector('#status')
+
+      // Show a short message in the status strip, then go back to the buzzer status.
+      function flashStatus(kind, text, ms) {
+        screen.dataset.moment = kind
+        setText(statusEl, text)
+        clearTimeout(momentTimer)
+        momentTimer = setTimeout(() => {
+          delete screen.dataset.moment
+          if (lastState) render(lastState)
+        }, ms)
+      }
+
+      // Game moments: subtle one-shot animations on top of the scores.
+      function onMoment({ event, args, answering }) {
+        if (event === 'strike' && answering) {
+          play(tiles[answering], Number(args[0]) >= 3 ? 'is-strike3' : 'is-strike', 1700)
+        } else if (event === 'reveal' && answering) {
+          play(tiles[answering], 'shine', 900)
+        } else if (event === 'steal') {
+          const to = args[0] === 'B' ? 'B' : 'A'
+          const from = to === 'A' ? 'B' : 'A'
+          play(tiles[to], 'is-steal', 2200)
+          play(tiles[to], 'shine', 900)
+          play(tiles[from], 'is-robbed', 2200)
+          const name = lastState?.teams?.[to]?.name || (to === 'A' ? 'Team 1' : 'Team 2')
+          if (ids.length > 1) flashStatus('steal', `${name} steals!`, 2600)
+        }
+      }
+
+      connectDisplay('small', render, onMoment)
+
+      function render(state) {
+        lastState = state
         for (const [id, el] of Object.entries(tiles)) {
           const t = state.teams?.[id]
           if (!t) continue
@@ -279,12 +320,10 @@
           })
         }
         lastWinner = state.winner
+        if (screen.dataset.moment) return // a strike/steal message is showing
         const w = state.winner && state.teams?.[state.winner]
-        setText(
-          document.querySelector('#status'),
-          w ? `${w.name} first!` : mode === 'ready' ? 'Buzzers ready' : 'Buzzers locked',
-        )
-      })
+        setText(statusEl, w ? `${w.name} first!` : mode === 'ready' ? 'Buzzers ready' : 'Buzzers locked')
+      }
     </script>
   </body>
 </html>

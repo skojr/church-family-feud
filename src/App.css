@@ -1338,3 +1338,93 @@
     transform: translateX(100%);
   }
 }
+
+/* =========================================================
+   Steal overlay: a coral card that slams in, shines, and fades
+   ========================================================= */
+.steal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  background: radial-gradient(circle, rgba(255, 115, 99, 0.28), rgba(26, 11, 51, 0.55) 70%);
+  animation: overlayFade 2.2s ease-in forwards;
+}
+
+.steal-card {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  gap: 1vh;
+  padding: 3vh 7vw 4vh;
+  overflow: hidden;
+  border: 6px solid transparent;
+  border-radius: 28px;
+  background:
+    linear-gradient(180deg, var(--plum), var(--night)) padding-box,
+    linear-gradient(135deg, #ffd0c8, var(--coral), var(--magenta-glow)) border-box;
+  box-shadow:
+    0 0 60px rgba(255, 115, 99, 0.55),
+    0 30px 80px rgba(0, 0, 0, 0.7);
+  animation: stealIn 0.5s cubic-bezier(0.25, 1.6, 0.45, 1) both;
+}
+
+.steal-card__word {
+  font-family: var(--font-display);
+  font-size: 24vh;
+  line-height: 0.9;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--coral);
+  text-shadow: 0 0 30px rgba(255, 115, 99, 0.85), 0 0.04em 0 rgba(90, 20, 30, 0.6);
+}
+
+.steal-card__team {
+  font-family: var(--font-body);
+  font-weight: 800;
+  font-size: 4.6vh;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #fff;
+  animation: fadeIn 0.4s 0.25s both;
+}
+
+.steal-card__points {
+  font-family: var(--font-display);
+  font-size: 9vh;
+  line-height: 1;
+  color: #fff;
+  text-shadow: 0 0 20px rgba(255, 255, 255, 0.6);
+  animation: stealPoints 0.6s 0.4s cubic-bezier(0.3, 1.6, 0.5, 1) both;
+}
+
+.steal-card__shine {
+  position: absolute;
+  inset: -20% auto -20% -40%;
+  width: 30%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.35), transparent);
+  transform: skewX(-20deg);
+  animation: stealShine 0.9s 0.35s ease-out both;
+}
+
+@keyframes stealIn {
+  from {
+    opacity: 0;
+    transform: translateX(-30vw) scale(0.8) rotate(-4deg);
+  }
+}
+
+@keyframes stealPoints {
+  from {
+    opacity: 0;
+    transform: translateY(2vh) scale(0.6);
+  }
+}
+
+@keyframes stealShine {
+  to {
+    left: 130%;
+  }
+}

@@ -2,13 +2,14 @@ import { useEffect, useRef, useState } from 'react'
 import { useGame } from './hooks/useGame'
 import { useHubLink } from './hooks/useHubLink'
 import { useFullscreen } from './hooks/useFullscreen'
-import { playReveal, playStrike } from './lib/sounds'
+import { playReveal, playSteal, playStrike } from './lib/sounds'
 import Brand from './components/Brand'
 import AnswerCard from './components/AnswerCard'
 import HostControls from './components/HostControls'
 import HostEditor from './components/HostEditor'
 import HelpOverlay from './components/HelpOverlay'
 import StrikeOverlay from './components/StrikeOverlay'
+import StealOverlay from './components/StealOverlay'
 import RulesScreen from './components/RulesScreen'
 import TeamPanel from './components/TeamPanel'
 import './App.css'
@@ -20,24 +21,34 @@ export default function App() {
   const [hostMode, setHostMode] = useState(false)
   const [showHelp, setShowHelp] = useState(false)
   const [strikeFlash, setStrikeFlash] = useState(0)
+  const [stealFlash, setStealFlash] = useState(null) // { key, to, points } while the STEAL! overlay shows
   const [isFullscreen, toggleFullscreen] = useFullscreen()
 
   // Sounds and the strike overlay follow the shared state, so they play here on the projector
   // no matter which device (this laptop or the phone host page) made the change.
-  const seen = useRef({ roundId: round.id, revealed: state.revealed.length, strikeCount: state.strikeCount })
+  const stealKey = state.steal ? `${state.steal.from}>${state.steal.to}` : null
+  const seen = useRef({ roundId: round.id, revealed: state.revealed.length, strikeCount: state.strikeCount, stealKey })
   useEffect(() => {
     const prev = seen.current
-    seen.current = { roundId: round.id, revealed: state.revealed.length, strikeCount: state.strikeCount }
+    seen.current = { roundId: round.id, revealed: state.revealed.length, strikeCount: state.strikeCount, stealKey }
     if (prev.roundId !== round.id) {
       setStrikeFlash(0)
+      setStealFlash(null)
       return
     }
+    if (stealKey && stealKey !== prev.stealKey) {
+      if (soundOn) playSteal()
+      const to = state.steal.to
+      setStealFlash((f) => ({ key: (f?.key ?? 0) + 1, to, points: game.roundPoints?.[to] ?? 0 }))
+      return
+    }
+    if (!stealKey && prev.stealKey) setStealFlash(null)
     if (state.revealed.length > prev.revealed && soundOn) playReveal()
     if (state.strikeCount > prev.strikeCount) {
       if (soundOn) playStrike()
       setStrikeFlash((f) => f + 1)
     }
-  }, [round.id, state.revealed.length, state.strikeCount, soundOn])
+  }, [round.id, state.revealed.length, state.strikeCount, stealKey, soundOn])
 
   useEffect(() => {
     const onKey = (e) => {
@@ -196,6 +207,14 @@ export default function App() {
       </main>
 
       {strikeFlash > 0 && <StrikeOverlay key={strikeFlash} count={Math.max(state.strikes, 1)} />}
+
+      {stealFlash && (
+        <StealOverlay
+          key={stealFlash.key}
+          teamName={game.teamName(stealFlash.to)}
+          points={stealFlash.points}
+        />
+      )}
 
       {game.rulesShown && (
         <RulesScreen roundCount={rounds.length} onClose={() => game.setRulesShown(false)} />

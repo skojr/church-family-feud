@@ -133,9 +133,13 @@ function now() {
   return performance.now()
 }
 
+// Changes every time the hub starts, so open LED pages reload and pick up new page code.
+const BUILD = Date.now().toString(36)
+
 function snapshot() {
   return {
     type: 'state',
+    build: BUILD,
     armed: game.armed,
     winner: game.winner,
     round: game.round,
@@ -161,6 +165,9 @@ function broadcastState() {
   for (const ws of wss.clients) if (ws.readyState === ws.OPEN && ws.role !== 'station') ws.send(msg)
   pushLeds()
 }
+
+// Game moments the LED pages animate.
+const SCREEN_MOMENTS = new Set(['strike', 'steal', 'reveal', 'revealall'])
 
 function broadcastScreens(msg) {
   const text = JSON.stringify(msg)
@@ -402,6 +409,10 @@ wss.on('connection', (ws, req) => {
           board.question = String(msg.args[1] ?? '')
         }
         if (msg.event === 'score' || msg.event === 'round') broadcastScreens({ type: 'board', board })
+        // Live moments (never the reconnect catch-up) drive the LED animations.
+        if (!msg.sync && SCREEN_MOMENTS.has(msg.event)) {
+          broadcastScreens({ type: 'moment', event: msg.event, args: msg.args ?? [], answering })
+        }
         break
       case 'teams':
         // Team names, totals and the answering team, from the game.

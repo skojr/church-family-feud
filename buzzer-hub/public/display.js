@@ -82,7 +82,8 @@ export function setScore(el, value) {
 
 // ------------------------------------------------------------- connection ----
 
-export function connectDisplay(role, onState) {
+// onMoment({ event, args, answering }) gets live game moments: strike, steal, reveal, revealall.
+export function connectDisplay(role, onState, onMoment = () => {}) {
   const offline = document.createElement('div')
   offline.className = 'offline'
   offline.textContent = 'Hub offline'
@@ -95,11 +96,15 @@ export function connectDisplay(role, onState) {
     onStatus: (up) => (offline.hidden = up),
     onMessage: (msg) => {
       if (msg.type === 'state') {
+        // The hub restarted with (maybe) new page code: reload to pick it up.
+        if (last?.build && msg.build && msg.build !== last.build) return location.reload()
         last = msg
         onState(msg)
       } else if (msg.type === 'board' && last) {
         last = { ...last, board: msg.board }
         onState(last)
+      } else if (msg.type === 'moment') {
+        onMoment(msg)
       }
     },
   })
@@ -107,3 +112,15 @@ export function connectDisplay(role, onState) {
 
 // Team id for a station letter (Team A = Station A).
 export const teamIds = ['A', 'B']
+
+// ---------------------------------------------------------------- moments ----
+
+// Play a one-shot animation class on an element (restarts it if already playing).
+export function play(el, cls, ms) {
+  if (!el) return
+  el.classList.remove(cls)
+  void el.offsetWidth
+  el.classList.add(cls)
+  clearTimeout(el[`_${cls}`])
+  el[`_${cls}`] = setTimeout(() => el.classList.remove(cls), ms)
+}

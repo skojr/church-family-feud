@@ -269,6 +269,17 @@ a larger window and crop in Resolume.
 
 The banner also lights up the name of the team that buzzed first.
 
+### Game moments on the LED screens
+Both LED pages play short, subtle animations when something happens in the game:
+
+| Moment | Banner | Small |
+|---|---|---|
+| Strike | The answering team's panels flash red (twice on the 3rd strike) | The answering team's tile flashes red |
+| Correct answer | A shine sweeps across the answering team's score | A shine sweeps across the answering team's tile |
+| Steal | The stealing team glows coral and pulses; the other team dims | Same, and the status strip shows "<Team> steals!" |
+
+They only play for live moments, never when the game reconnects. Open LED pages reload by themselves when the hub restarts, so they always run the latest version.
+
 ### Team names and scores
 - **The game owns them.** Set team names and fix scores in the game: the phone host page
   (`/?view=host`, **Edit votes & teams** tab) or **Host Edit** on the board. Points are earned by
