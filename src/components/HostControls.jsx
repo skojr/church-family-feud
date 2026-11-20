@@ -4,11 +4,14 @@ import {
   ChevronRight,
   Eye,
   EyeOff,
+  HandCoins,
   Keyboard,
   Maximize,
   Minimize,
   Pencil,
+  QrCode,
   RotateCcw,
+  Undo2,
   Volume2,
   VolumeX,
   X,
@@ -38,7 +41,10 @@ export default function HostControls({
   onRevealAll,
   onHideAll,
   onStrike,
+  onSteal,
+  stolen,
   onSwitchTeam,
+  onShowRules,
   soundOn,
   onToggleSound,
   hostMode,
@@ -55,6 +61,12 @@ export default function HostControls({
         <Btn icon={EyeOff} label="Hide All" onClick={onHideAll} hint="H" />
         <Btn icon={Eye} label="Reveal All" onClick={onRevealAll} hint="A" />
         <Btn icon={X} label="Strike" onClick={onStrike} variant="danger" hint="X" />
+        <Btn
+          icon={stolen ? Undo2 : HandCoins}
+          label={stolen ? 'Undo Steal' : 'Steal'}
+          onClick={onSteal}
+          hint="S"
+        />
         <Btn icon={ArrowLeftRight} label="Team" onClick={onSwitchTeam} hint="T" />
         <Btn icon={ChevronRight} label="Next" onClick={onNext} disabled={!canNext} hint="→" />
       </div>
@@ -65,6 +77,7 @@ export default function HostControls({
           onClick={onToggleSound}
           hint="M"
         />
+        <Btn icon={QrCode} label="Rules" onClick={onShowRules} hint="Q" />
         <Btn icon={Pencil} label="Host Edit" onClick={onToggleHost} active={hostMode} hint="E" />
         <Btn icon={Keyboard} label="Keys" onClick={onToggleHelp} hint="?" />
         <Btn

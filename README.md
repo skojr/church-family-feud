@@ -18,7 +18,7 @@ A Family Feud–style game show board made for the ICGC church gathering. It run
 - When the host reveals an answer, the slot **flips over** with a chime and shows the answer and how many people voted for it. Those votes are added to the score of the team that is answering.
 - A **team card** on each side of the board shows that team's **total points**, with a smaller **This round** card underneath showing what the team has earned in the current round. The team that is currently answering glows and has an **Answering** tag.
 
-There are **10 rounds**, each with its own question.
+There are **9 rounds**, each with its own question.
 
 ### What the host does
 
@@ -28,6 +28,8 @@ The host runs the game from the laptop, using the mouse or the keyboard.
 - **Reveal an answer:** click its slot, or press its number (**1–6**). Answers can be revealed in any order. The answer's votes go to the team that is answering. Clicking a revealed answer hides it again and takes those points back.
 - **Reveal the next hidden answer:** press **Space**.
 - **Wrong answer:** press **X** (or click **Strike**) to flash a big red ✕ with a buzzer. Each round keeps track of up to 3 strikes, shown under the board.
+- **Steal:** after the third strike, let the other team answer. If they get it, reveal their answer and press **S** (or click **Steal**). Every point from that round moves to the stealing team, and they become the answering team. Pressing **S** again undoes the steal. The projector shows a big **STEAL!** with the team's name and a sting, the LED screens light up the stealing team, and the `/feud/cue/steal` lighting cue fires.
+- **Rules and voting QR code:** press **Q** (or click **Rules**) to cover the board with a "How to play" screen that goes over the rules and shows the Menti QR code. Press **Q** or **Esc**, or click anywhere, to go back to the board. The phone host page has a button for it too. To change the QR code, replace `public/menti-qr-code.png`.
 - **Change rounds:** use the **← / →** arrow keys, the **Prev / Next** buttons, or click a numbered dot at the bottom left.
 - **Fullscreen:** press **F** or click **Fullscreen**. Press **F** or **Esc** to leave fullscreen.
 
@@ -40,11 +42,13 @@ The buttons along the bottom stay faded so they don't distract the audience. Mov
 | **← / →** | Previous / next round |
 | **1 – 6** | Reveal that answer |
 | **Space** | Reveal the next hidden answer |
-| **A** | Reveal all answers |
+| **A** | Reveal all answers (the newly shown answers score no points) |
 | **H** | Hide all answers |
 | **R** | Reset the round (hides answers and clears strikes) |
 | **X** | Add a strike |
+| **S** | Steal: move this round's points to the other team (press again to undo) |
 | **T** | Switch which team is answering |
+| **Q** | Show/hide the "How to play" screen with the voting QR code |
 | **F** | Fullscreen on/off |
 | **E** | Open/close Host Edit mode |
 | **M** | Sound on/off |
@@ -62,7 +66,7 @@ Votes are collected separately (for example with Mentimeter). To enter the resul
 Your changes **save automatically**. Refreshing the page or closing the browser won't lose them, as long as you use the **same browser on the same computer**.
 
 - **Restore this round** puts the current round back to its original questions and votes.
-- **Restore all defaults** does the same for all 10 rounds.
+- **Restore all defaults** does the same for all 9 rounds.
 
 The **Teams** section of the panel lets you rename each team and type in a team's total points if you need to correct it. **Reset team scores** sets both teams back to 0 for a new game.
 
@@ -101,6 +105,8 @@ npm run host    # laptop + phone control
 - [ ] Press **R** on any round you tested so it starts out hidden.
 - [ ] Enter the team names and click **Reset team scores** in Host Edit mode so both teams start at 0.
 - [ ] If you're hosting from a phone: at the venue, run `npm run host`, open the host page on the phone, and check that revealing an answer on the phone shows up on the projector (see the [Setup Guide](setup.md#part-3-control-the-game-from-the-phone)).
+- [ ] If you're using the buzzers or LED screens: start the hub (`npm start` in `buzzer-hub`), check both buzzers show **Online** on the hub page, and press each one once to test (see the [Setup Guide](setup.md#part-4-buzzers-led-screens-and-cues)).
+- [ ] Open the LED pages in the browser Resolume captures and size each window to its LED canvas. Check that the team names on the banner match the board.
 - [ ] Turn off laptop sleep and keep the laptop plugged in.
 - [ ] For a full run-through of every screen and control, work through the [UI test plan](docs/test-plan.md).
 
@@ -112,6 +118,49 @@ The game always draws a 16:9 board and scales it to fit the screen, so it looks 
 - **Use the projector's own resolution.** On a Mac, open **System Settings → Displays**, select the projector, and choose its default resolution (usually 1920 × 1080 or 1280 × 720).
 - **Mirror or extend:** mirroring shows the same screen on both. Extending lets you drag the game window onto the projector and keep the laptop screen for yourself. Either works; press **F** after the window is on the projector.
 - **If the edges are cut off on the wall,** the projector is cropping the picture ("overscan"). Turn off overscan in the projector's menu, or on a Mac turn on **Underscan** in the display settings.
+
+---
+
+## All the links
+
+Two programs run on the show laptop: **the game** (port 5173) and **the buzzer hub** (port 8090). Start both (see [Part 4 of the Setup Guide](setup.md#part-4-buzzers-led-screens-and-cues)).
+
+On the laptop itself, use `localhost`. From any other device on the same network (a phone, the Resolume computer), replace `localhost` with the laptop's network address, shown as **Network** when the game starts and **On network** when the hub starts (for example `192.168.0.21`).
+
+| Screen | On the laptop | From another device | Used for |
+| --- | --- | --- | --- |
+| **Game board** | http://localhost:5173 | `http://<laptop-ip>:5173` | The projector. Press **F** for fullscreen. |
+| **Host view** | http://localhost:5173/?view=host | `http://<laptop-ip>:5173/?view=host` | The host's phone: answers, votes, team names, strikes. From a phone, the game must be started with `npm run host`. |
+| **Buzzer hub** | http://localhost:8090 | `http://<laptop-ip>:8090` | Buzzer status, reset/lock, links to everything below. |
+| **LED control** | http://localhost:8090/control | `http://<laptop-ip>:8090/control` | Team scores and buzzer state at a glance, buzzer reset/lock, LED links. |
+| **OSC cues** | http://localhost:8090/osc | `http://<laptop-ip>:8090/osc` | Teach the lighting program each moment (buzz, reveal, strike…): put it in learn mode and press Send. |
+| **LED banner** | http://localhost:8090/banner | `http://<laptop-ip>:8090/banner` | Long LED banner: team names and total points. |
+| **LED small** | http://localhost:8090/small | `http://<laptop-ip>:8090/small` | Small LED screen: both teams' points and who buzzed first. |
+| **LED small, Team 1 only** | http://localhost:8090/small?team=A | `http://<laptop-ip>:8090/small?team=A` | One team's podium screen. |
+| **LED small, Team 2 only** | http://localhost:8090/small?team=B | `http://<laptop-ip>:8090/small?team=B` | One team's podium screen. |
+| **Buzzer simulator** | http://localhost:8090/sim | `http://<laptop-ip>:8090/sim` | Test without the real buzzers. |
+
+- Add `?bg=black` to any LED link (or `&bg=black` when it already has a `?`, like `/small?team=A&bg=black`) for a pure black background to key in Resolume.
+- Team names and scores always come from the game. Change them in **Host Edit** on the board (press **E**) or the host view's **Edit votes & teams** tab; the LED screens follow by themselves.
+- Buzzer A is Team 1 and buzzer B is Team 2. Whoever buzzes first becomes the answering team on the board.
+
+---
+
+## Buzzers, LED screens and OSC cues
+
+The `buzzer-hub` folder is a separate small program for the extras. Run it alongside the game:
+
+```bash
+cd buzzer-hub
+npm install
+npm start
+```
+
+- **Buzzers:** two ESP32 buzzer stations. The first team to buzz becomes the answering team on the board automatically.
+- **LED screens for Resolume:** a long banner with team names and scores, and a small "who buzzed first" screen. See [All the links](#all-the-links).
+- **OSC cues** to QLab, Resolume, Companion and similar apps on every reveal, strike, round change and buzz.
+
+Setup, wiring and the full OSC list are in [buzzer-hub/README.md](buzzer-hub/README.md).
 
 ---
 

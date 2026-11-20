@@ -1,5 +1,17 @@
 import { useState, useSyncExternalStore } from 'react'
-import { ChevronLeft, ChevronRight, Eye, EyeOff, RotateCcw, Volume2, VolumeX, X } from 'lucide-react'
+import {
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  EyeOff,
+  HandCoins,
+  QrCode,
+  RotateCcw,
+  Undo2,
+  Volume2,
+  VolumeX,
+  X,
+} from 'lucide-react'
 import { useGame } from '../hooks/useGame'
 import { isConnected, onConnectionChange, syncEnabled } from '../lib/sync'
 import HostEditor from './HostEditor'
@@ -127,6 +139,10 @@ export default function HostView() {
             <button type="button" className="host__btn" onClick={game.switchTeam}>
               Switch team
             </button>
+            <button type="button" className="host__btn" onClick={game.steal}>
+              {state.steal ? <Undo2 size={18} /> : <HandCoins size={18} />}{' '}
+              {state.steal ? 'Undo steal' : `Steal for ${game.teamName(game.stealTo)}`}
+            </button>
             <button type="button" className="host__btn" onClick={game.revealAll}>
               <Eye size={18} /> Reveal all
             </button>
@@ -135,6 +151,14 @@ export default function HostView() {
             </button>
             <button type="button" className="host__btn" onClick={game.resetRound}>
               <RotateCcw size={18} /> Reset round
+            </button>
+            <button
+              type="button"
+              className={`host__btn ${game.rulesShown ? 'is-on' : ''}`}
+              onClick={() => game.setRulesShown((v) => !v)}
+              aria-pressed={game.rulesShown}
+            >
+              <QrCode size={18} /> {game.rulesShown ? 'Hide rules' : 'Show rules'}
             </button>
             <button type="button" className="host__btn" onClick={() => game.setSoundOn((v) => !v)}>
               {soundOn ? <Volume2 size={18} /> : <VolumeX size={18} />} Sound {soundOn ? 'on' : 'off'}

@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>LED Banner · Teams</title>
+    <link rel="stylesheet" href="/display.css" />
+    <style>
+      /* Long LED banner: team names and running scores.
+         Sized entirely from the window, so it fills any LED canvas.
+         Wide canvases (4:1 and wider) put both teams in one row, mirrored
+         around the ICGC mark. Squarer canvases stack the teams in two rows. */
+      body {
+        background:
+          radial-gradient(ellipse 50% 120% at 50% 50%, rgba(121, 2, 255, 0.35), transparent 70%),
+          var(--bg);
+      }
+      :root.bg-black body {
+        background: #000;
+      }
+
+      .banner {
+        --gap: max(2px, 1.6vmin);
+        height: 100vh;
+        display: grid;
+        gap: var(--gap);
+        padding: var(--gap);
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 1fr;
+      }
+
+      .team {
+        --score-w: min(30vw, 72vh);
+        display: grid;
+        grid-template-columns: 1fr var(--score-w);
+        gap: var(--gap);
+        min-width: 0;
+        min-height: 0;
+      }
+
+      .team__name {
+        position: relative;
+        border-radius: min(1.6vmin, 14px);
+        background: linear-gradient(180deg, var(--violet) 0%, var(--plum) 100%);
+        box-shadow: inset 0 0 0 max(1px, 0.5vmin) rgba(255, 255, 255, 0.08);
+        transition: background 0.3s, box-shadow 0.3s;
+      }
+      .team__name .fit {
+        font-family: var(--font-display);
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+        color: var(--white);
+      }
+
+      .team__score {
+        border-radius: min(1.6vmin, 14px);
+        background: linear-gradient(180deg, var(--coral) 0%, var(--coral-deep) 100%);
+      }
+      .team__score .fit {
+        font-family: var(--font-display);
+        font-variant-numeric: tabular-nums;
+        color: var(--white);
+        text-shadow: 0 0.04em 0 rgba(90, 20, 30, 0.35);
+      }
+
+      .mark {
+        display: none;
+        place-items: center;
+        min-width: 0;
+        min-height: 0;
+      }
+      .mark svg {
+        height: 72%;
+        max-width: 90%;
+        fill: var(--white);
+      }
+
+      /* Team that buzzed first: name panel lights up */
+      .team.is-first .team__name {
+        background: linear-gradient(180deg, var(--violet-glow) 0%, var(--violet) 100%);
+        box-shadow:
+          inset 0 0 0 max(2px, 1vmin) var(--coral),
+          0 0 4vmin rgba(255, 115, 99, 0.55);
+        animation: glow 0.9s ease-in-out 3;
+      }
+      @keyframes glow {
+        50% {
+          box-shadow:
+            inset 0 0 0 max(2px, 1vmin) #fff,
+            0 0 6vmin rgba(255, 255, 255, 0.5);
+        }
+      }
+
+      /* Wide LED strip: one row, mirrored */
+      @media (min-aspect-ratio: 4/1) {
+        .banner {
+          grid-template-columns: 1fr auto 1fr;
+          grid-template-rows: 1fr;
+        }
+        .team {
+          --score-w: min(18vw, 150vh);
+        }
+        .team--b {
+          grid-template-columns: var(--score-w) 1fr;
+        }
+        .team--b .team__score {
+          order: -1;
+        }
+        .mark {
+          display: grid;
+          width: min(10vw, 80vh);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="banner">
+      <section class="team team--a" data-team="A">
+        <div class="team__name fit-box"><span class="fit" data-fit-h="0.78">Team 1</span></div>
+        <div class="team__score fit-box" data-pop><span class="fit score" data-fit-h="0.86">0</span></div>
+      </section>
+
+      <div class="mark" aria-hidden="true">
+        <svg viewBox="60 80 400 360">
+          <ellipse cx="249.07" cy="247.93" rx="83.17" ry="83.78" />
+          <path d="M173.88,164.15h-43.96v197.17h43.96v-67.55h0c-12.23-24.11-14.05-52.24-5.03-77.75l5.03-14.22v-37.65Z" />
+          <path d="M323.8,391.38h43.96V143.28h-43.96v58.83h0c12.23,24.11,14.05,52.24,5.03,77.75l-5.03,14.22v97.31Z" />
+          <path d="M193.53,143.28v35.14l5.970-3.43c12.45-7.16,26.1-11.95,40.27-14.14h0v-17.57h-46.23Z" />
+          <path d="M303.65,361.32v-44.9s-.93,1.11-.93,1.11c-3.92,3.66-8.41,6.87-13.05,8.8-10.31,4.29-21.91,7.31-31.78,8.83v.98s0,25.18,0,25.18h45.76Z" />
+          <path d="M257.41,86.12h46.23s0,95.05,0,95.05c-3.73-3.17-7.39-6.47-11.64-8.93-4.26-2.47-8.9-4.22-13.6-5.64-5.17-1.57-10.44-2.76-15.64-4.24-1.46-.42-2.75-.45-5.36-.45,0-4.47,0-8.93,0-13.4v-62.39Z" />
+          <path d="M239.76,388.3h-46.23v-71.88h0c6.54,5.55,13.92,10.04,21.93,13.07,3.95,1.5,7.98,2.8,12.06,3.92l5.21,1.42,7.03,1.92v51.56Z" />
+          <path d="M367.76,298.94c114.15,45.51,47.51,96.84-35.53,109.95-63.91,7.17-174.31,11.11-233.92-24.73-43.96-28.13-14.63-63.84,19.96-78.25,7.93-3.34,11.72-2.7,11.7-2.97l-.05-10.56c-31.48,7.21-116.45,38.5-76.72,82.97,38.35,38.14,143,49.99,193.09,49.6,60.26,.05,146.9-7.53,197.86-44.49,54.03-47.07-40.25-82.98-76.4-89.29v7.77Z" />
+        </svg>
+      </div>
+
+      <section class="team team--b" data-team="B">
+        <div class="team__name fit-box"><span class="fit" data-fit-h="0.78">Team 2</span></div>
+        <div class="team__score fit-box" data-pop><span class="fit score" data-fit-h="0.86">0</span></div>
+      </section>
+    </main>
+
+    <script type="module">
+      import { connectDisplay, play, setScore, setText, watchFit } from './display.js'
+
+      watchFit()
+      const team = (id) => document.querySelector(`.team[data-team="${id}"]`)
+
+      // Game moments: subtle one-shot animations on top of the scores.
+      function onMoment({ event, args, answering }) {
+        if (event === 'strike' && answering) {
+          const cls = Number(args[0]) >= 3 ? 'is-strike3' : 'is-strike'
+          for (const part of team(answering)?.querySelectorAll('.team__name, .team__score') ?? []) {
+            play(part, cls, 1700)
+          }
+        } else if (event === 'reveal' && answering) {
+          play(team(answering)?.querySelector('.team__score'), 'shine', 900)
+        } else if (event === 'steal') {
+          const to = args[0] === 'B' ? 'B' : 'A'
+          const from = to === 'A' ? 'B' : 'A'
+          for (const part of team(to)?.querySelectorAll('.team__name, .team__score') ?? []) {
+            play(part, 'is-steal', 2200)
+            play(part, 'shine', 900)
+          }
+          play(team(from), 'is-robbed', 2200)
+        }
+      }
+
+      connectDisplay('banner', (state) => {
+        for (const el of document.querySelectorAll('.team')) {
+          const t = state.teams?.[el.dataset.team]
+          if (!t) continue
+          setText(el.querySelector('.team__name .fit'), t.name)
+          setScore(el.querySelector('.score'), t.score)
+          el.classList.toggle('is-first', state.winner === el.dataset.team)
+        }
+      }, onMoment)
+    </script>
+  </body>
+</html>

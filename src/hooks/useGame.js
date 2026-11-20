@@ -1,5 +1,6 @@
 import defaultRounds, { isValidRounds, sortByVotes } from '../data/rounds'
 import { useLocalStorage } from './useLocalStorage'
+import { emit } from '../lib/hub'
 
 const cloneDefaults = () => structuredClone(defaultRounds)
 const isPlainObject = (v) => v !== null && typeof v === 'object' && !Array.isArray(v)
@@ -13,8 +14,16 @@ const isValidTeams = (v) =>
   v.length === 2 &&
   v.every((t) => isPlainObject(t) && typeof t.name === 'string' && Number.isFinite(t.bonus))
 const isTeamIndex = (v) => v === 0 || v === 1
+const STEAL_LETTERS = ['A', 'B'] // matches the buzzer hub: Team 1 = A, Team 2 = B
 
-const emptyRoundState = { revealed: [], strikes: 0, strikeCount: 0, awarded: {} }
+const emptyRoundState = {
+  revealed: [],
+  strikes: 0,
+  strikeCount: 0,
+  awarded: {},
+  control: null,
+  steal: null,
+}
 
 // Points a round has earned each team: revealed answers credited to the team that was answering.
 const roundTeamPoints = (round, state) => {
@@ -35,11 +44,17 @@ const roundTeamPoints = (round, state) => {
 export function useGame() {
   const [rounds, setRounds] = useLocalStorage('igc-feud:rounds', cloneDefaults, isValidRounds)
   const [storedIndex, setRoundIndex] = useLocalStorage('igc-feud:round', 0)
-  // { [roundId]: { revealed: number[], strikes: number, strikeCount: number, awarded: { [answerId]: teamIndex } } }
+  // { [roundId]: { revealed: number[], strikes: number, strikeCount: number,
+  //   awarded: { [answerId]: teamIndex }, control: teamIndex | null,
+  //   steal: { from, to, previous: awarded } | null } }
   // `strikes` is what the board shows (max 3); `strikeCount` goes up on every press so the
   // display can flash the strike overlay even when the board is already at 3.
+  // `control` is the team that was answering when the third strike landed (the team a steal
+  // takes from). `steal.previous` is the award map before the steal, so it can be undone.
   const [roundState, setRoundState] = useLocalStorage('igc-feud:state', {}, isPlainObject)
   const [soundOn, setSoundOn] = useLocalStorage('igc-feud:sound', true)
+  // The "How to play" screen (rules + voting QR code) covering the board on the projector.
+  const [rulesShown, setRulesShown] = useLocalStorage('igc-feud:rules', false)
   // `bonus` holds manual adjustments from Host Edit on top of the points earned from reveals.
   const [teams, setTeams] = useLocalStorage('igc-feud:teams', defaultTeams, isValidTeams)
   const [activeTeam, setActiveTeam] = useLocalStorage('igc-feud:active-team', 0, isTeamIndex)
@@ -89,21 +104,58 @@ export function useGame() {
     if (next) reveal(next.id)
   }
 
-  const revealAll = () =>
-    updateState((s) => {
-      const awarded = { ...s.awarded }
-      for (const a of playable) if (!revealed.has(a.id)) awarded[a.id] = activeTeam
-      return { revealed: playable.map((a) => a.id), awarded }
-    })
+  // emit(): bulk actions also go to the buzzer hub as OSC cues. Single reveals,
+  // hides and strikes are reported by useHubLink on the board.
+  // Shows the rest of the board without scoring it; answers already revealed keep their points.
+  const revealAll = () => {
+    emit('revealall')
+    updateState(() => ({ revealed: playable.map((a) => a.id) }))
+  }
 
-  const hideAll = () => updateState(() => ({ revealed: [], awarded: {} }))
-  const resetRound = () => updateState(() => ({ revealed: [], strikes: 0, awarded: {} }))
+  const hideAll = () => {
+    emit('hideall')
+    updateState(() => ({ revealed: [], awarded: {}, steal: null }))
+  }
+  const resetRound = () => {
+    emit('reset')
+    updateState(() => ({ revealed: [], strikes: 0, awarded: {}, control: null, steal: null }))
+  }
 
   const strike = () =>
     updateState((s) => ({
       strikes: Math.min(s.strikes + 1, 3),
       strikeCount: s.strikeCount + 1,
+      control: s.strikes === 2 ? activeTeam : s.control,
     }))
+
+  // Gives every point earned this round to the team that didn't have control, and makes it
+  // the answering team. Pressing it again undoes the steal.
+  const stealFrom = isTeamIndex(state.control)
+    ? state.control
+    : roundPoints[0] >= roundPoints[1]
+      ? 0
+      : 1
+  const stealTo = state.steal ? state.steal.from : 1 - stealFrom
+
+  const steal = () => {
+    if (state.steal) {
+      const { from, previous } = state.steal
+      updateState((s) => {
+        const awarded = Object.fromEntries(Object.keys(s.awarded).map((id) => [id, from]))
+        return { awarded: { ...awarded, ...previous }, steal: null }
+      })
+      setActiveTeam(from)
+      return
+    }
+    const from = stealFrom
+    const to = 1 - from
+    emit('steal', STEAL_LETTERS[to], to + 1)
+    updateState((s) => ({
+      awarded: Object.fromEntries(Object.keys(s.awarded).map((id) => [id, to])),
+      steal: { from, to, previous: s.awarded },
+    }))
+    setActiveTeam(to)
+  }
 
   const switchTeam = () => setActiveTeam((t) => (t === 0 ? 1 : 0))
 
@@ -138,7 +190,9 @@ export function useGame() {
     if (!window.confirm('Reset both team scores to 0? Revealed answers stay revealed.')) return
     setTeams((prev) => prev.map((t) => ({ ...t, bonus: 0 })))
     setRoundState((prev) =>
-      Object.fromEntries(Object.entries(prev).map(([id, s]) => [id, { ...s, awarded: {} }])),
+      Object.fromEntries(
+        Object.entries(prev).map(([id, s]) => [id, { ...s, awarded: {}, steal: null }]),
+      ),
     )
   }
 
@@ -159,6 +213,8 @@ export function useGame() {
     activeTeam,
     soundOn,
     setSoundOn,
+    rulesShown: rulesShown === true,
+    setRulesShown,
     setActiveTeam,
     reveal,
     hide,
@@ -168,6 +224,8 @@ export function useGame() {
     hideAll,
     resetRound,
     strike,
+    steal,
+    stealTo,
     switchTeam,
     goTo,
     changeQuestion,

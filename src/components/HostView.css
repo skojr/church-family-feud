@@ -289,6 +289,11 @@
   transform: scale(0.98);
 }
 
+.host__btn.is-on {
+  background: linear-gradient(180deg, var(--coral), var(--coral-deep));
+  border-color: #ffc2b8;
+}
+
 .host__btn--strike {
   grid-column: 1 / -1;
   min-height: 60px;

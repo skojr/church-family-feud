@@ -1,0 +1,179 @@
+/* Shared look for the LED pages (/banner, /small) and the control page.
+   ICGC · The Gathering '26 palette. Fonts are served by the hub, so the
+   screens work with no internet. */
+
+@font-face {
+  font-family: 'League Gothic';
+  src: url('/fonts/league-gothic-latin-400-normal.woff2') format('woff2');
+  font-weight: 400;
+  font-display: block;
+}
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/montserrat-latin-600-normal.woff2') format('woff2');
+  font-weight: 600;
+  font-display: block;
+}
+@font-face {
+  font-family: 'Montserrat';
+  src: url('/fonts/montserrat-latin-800-normal.woff2') format('woff2');
+  font-weight: 800;
+  font-display: block;
+}
+
+:root {
+  --night: #1a0b33;
+  --plum: #2d1159;
+  --violet: #4604b1;
+  --violet-glow: #7902ff;
+  --coral: #ff7363;
+  --coral-deep: #e2553f;
+  --magenta: #df3c80;
+  --white: #ffffff;
+  --bg: var(--night);
+  --font-display: 'League Gothic', 'Anton', Impact, 'Arial Narrow Bold', sans-serif;
+  --font-body: 'Montserrat', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color-scheme: dark;
+}
+
+/* ?bg=black for keying in Resolume */
+:root.bg-black {
+  --bg: #000;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--white);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  cursor: none;
+}
+
+/* Text that is sized by display.js to fill its box. */
+.fit {
+  display: block;
+  white-space: nowrap;
+  line-height: 1;
+}
+
+.fit-box {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Offline notice: only shown when the page loses the hub. */
+.offline {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  padding: 0.3em 0.6em;
+  font: 800 clamp(8px, 2.2vmin, 18px) var(--font-body);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  background: #b81d2b;
+  color: #fff;
+}
+
+/* Score pop when the number changes */
+@keyframes pop {
+  0% {
+    transform: scale(1);
+  }
+  30% {
+    transform: scale(1.12);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.pop {
+  animation: pop 0.5s cubic-bezier(0.3, 1.6, 0.5, 1);
+}
+
+/* ---- Game moments (kept short and subtle: LED walls are bright) ---- */
+
+/* Strike: the answering team's panel flashes red. Third strike flashes twice. */
+.is-strike {
+  animation: strikeHit 1.1s ease-out;
+}
+.is-strike3 {
+  animation: strikeHit 0.8s ease-out 2;
+}
+@keyframes strikeHit {
+  0%,
+  100% {
+    box-shadow: none;
+  }
+  10%,
+  45% {
+    background: linear-gradient(180deg, #9b1426 0%, #4a0816 100%);
+    box-shadow:
+      inset 0 0 0 max(2px, 1vmin) #ff2a3a,
+      inset 0 0 8vmin rgba(255, 30, 45, 0.6);
+  }
+}
+
+/* Shine: one soft white sweep across a panel (a correct answer for that team). */
+.shine {
+  position: relative;
+  overflow: hidden;
+}
+.shine::after {
+  content: '';
+  position: absolute;
+  top: -10%;
+  bottom: -10%;
+  left: -50%;
+  width: 35%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+  transform: skewX(-20deg);
+  animation: shineSweep 0.8s ease-out forwards;
+  pointer-events: none;
+}
+@keyframes shineSweep {
+  to {
+    left: 130%;
+  }
+}
+
+/* Steal: the stealing team's panel glows coral, pulses twice, and shines. */
+.is-steal {
+  position: relative;
+  animation: stealPulse 0.7s ease-in-out 3;
+}
+@keyframes stealPulse {
+  50% {
+    box-shadow:
+      inset 0 0 0 max(2px, 1vmin) #fff,
+      0 0 6vmin rgba(255, 115, 99, 0.7);
+    filter: brightness(1.25);
+  }
+}
+.is-robbed {
+  transition: opacity 0.3s, filter 0.3s;
+  opacity: 0.45;
+  filter: saturate(0.4);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

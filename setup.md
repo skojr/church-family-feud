@@ -5,7 +5,10 @@ Step-by-step instructions for getting the game running on a laptop, and then con
 - [Part 1: Get the game running on the laptop](#part-1-get-the-game-running-on-the-laptop)
 - [Part 2: Expose the game so a phone can reach it](#part-2-expose-the-game-so-a-phone-can-reach-it)
 - [Part 3: Control the game from the phone](#part-3-control-the-game-from-the-phone)
+- [Part 4: Buzzers, LED screens and cues](#part-4-buzzers-led-screens-and-cues)
 - [Troubleshooting](#troubleshooting)
+
+All the addresses (board, host view, buzzer hub, LED screens) are listed in one table in the README: [All the links](README.md#all-the-links).
 
 ---
 
@@ -137,7 +140,8 @@ On the phone you can:
 
 - Tap a team to make it the answering team.
 - Tap an answer to reveal it on the projector (its votes go to the answering team). Tap it again to hide it.
-- Strike, Switch team, Reveal all, Hide all, Reset round, Sound on/off, and change rounds with the arrows.
+- Show rules (covers the projector with the rules and the voting QR code; tap again to hide it).
+- Strike, Switch team, Steal, Reveal all, Hide all, Reset round, Sound on/off, and change rounds with the arrows.
 - Use **Edit votes & teams** to type in the Mentimeter results, team names, and team totals.
 
 Everything you do on either device shows up on the other straight away. The laptop's keyboard and mouse keep working too, so if the phone has a problem, just carry on from the laptop.
@@ -147,6 +151,66 @@ Everything you do on either device shows up on the other straight away. The lapt
 - Keep the laptop plugged in and turn off sleep. If the laptop sleeps, the phone disconnects.
 - Leave the terminal running `npm run host` open. Closing it stops the game for both devices.
 - Don't edit the code files while the game is running: the pages reload when a file changes.
+
+---
+
+## Part 4: Buzzers, LED screens and cues
+
+This part is only needed if you're using the buzzers, the LED wall screens or OSC cues. They run in a second small program, the **buzzer hub**, alongside the game.
+
+### 1. Start the hub
+
+Open a **second** terminal window (leave the game running in the first), go to the game folder, then:
+
+```bash
+cd buzzer-hub
+npm install
+npm start
+```
+
+`npm install` is only needed the first time. The hub prints its addresses:
+
+```
+  Bell screen   http://localhost:8090
+  Simulator     http://localhost:8090/sim
+  Control       http://localhost:8090/control   (LED screens and buzzers)
+  LED banner    http://localhost:8090/banner
+  LED small     http://localhost:8090/small
+  On network    http://192.168.1.23:8090   (stations find this automatically)
+```
+
+The first time, macOS may ask whether `node` can accept incoming connections. Click **Allow**.
+
+### 2. Check the buzzers
+
+Open http://localhost:8090. Power the two buzzer stations; within about 10 seconds both show **Online**. Press each one: the screen shows who buzzed first, and on the game board that team becomes the **Answering** team. Press **Reset & arm** (or Space) to arm them again.
+
+No buzzers yet? Open http://localhost:8090/sim and press **A** or **B** on the keyboard.
+
+### 3. Open the LED screens
+
+Use the buttons along the bottom of the hub page, or the links in [All the links](README.md#all-the-links). Open each LED page in its own browser window, set the window to the LED canvas size (or crop in Resolume), and screen-capture it into Resolume. Everything resizes to fit, from one 128×128 panel to a long strip.
+
+If Resolume runs on a different computer, open the pages there using the laptop's **On network** address instead of `localhost`.
+
+### 4. Optional: OSC cues
+
+To fire cues on a lighting desk, QLab, Resolume or Companion, open http://localhost:8090/osc (or the **OSC cues** button on the hub page). It can also be opened from the lighting computer at the laptop's **On network** address, for example `http://192.168.1.169:8090/osc`.
+
+1. Under **Send to**, add the lighting computer: its IP and the port its OSC input listens on.
+2. In the lighting program, put the OSC input in **learn** mode for the button or cue you want.
+3. On the page, press **Send ▶** next to the moment (for example **3rd strike**). The program learns it. Repeat for each moment. The ones with sound effects are listed first.
+4. That's it: during the game the same message goes out each time that moment happens. Changes save by themselves, and the **Sent** list shows every message as it goes out.
+
+The settings live in `buzzer-hub/osc.config.json`. It isn't saved in git, so **copy that file across** if the hub moves to another computer, and check the IPs in it.
+
+### Order on the day
+
+1. Start the game (`npm run host` if the host uses a phone, otherwise `npm run dev`).
+2. Start the hub (`npm start` in `buzzer-hub`).
+3. Open the board on the projector, the host view on the phone, and the LED pages for Resolume.
+
+The game finds the hub by itself, in any order. If the hub is restarted, the LED screens catch up within a few seconds.
 
 ---
 
@@ -168,6 +232,14 @@ Wait a few seconds; it catches up automatically. If it doesn't, check the laptop
 **The banner says Not synced (run npm run host)**
 
 The game is being served as a production build (for example `npm run preview`) instead of `npm run host`. Phone control only works with `npm run host`.
+
+**The LED screens show 0 or old team names**
+
+The game sends the team names and scores to the hub. Check the board is open in a browser (it's the board page that reports to the hub) and the hub is running. If the hub was started before an update, stop it with Ctrl + C and run `npm start` again.
+
+**A buzzer stays Offline**
+
+Check it has power and is on the same network as the laptop. If the network blocks discovery, type the hub's **On network** address (for example `192.168.1.23:8090`) in the station's setup page. See [buzzer-hub/README.md](buzzer-hub/README.md).
 
 **Starting completely fresh**
 

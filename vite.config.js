@@ -42,11 +42,16 @@ function feudSync() {
         client.send('feud:snapshot', snapshot)
       })
 
-      server.ws.on('feud:set', (data) => {
+      server.ws.on('feud:set', (data, sender) => {
         if (!data || !isGameKey(data.key)) return
         snapshot[data.key] = data.value
         save()
-        server.ws.send('feud:update', data)
+        // Not back to the sender: it already has this value, and an echo arriving after its
+        // next change would briefly roll that window back (board flicker, repeated sounds,
+        // repeated OSC cues).
+        for (const client of server.ws.clients) {
+          if (client !== sender) client.send('feud:update', data)
+        }
       })
     },
   }
