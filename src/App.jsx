@@ -62,6 +62,7 @@ export default function App() {
         a: game.revealAll,
         h: game.hideAll,
         x: game.strike,
+        s: game.steal,
         t: game.switchTeam,
         f: toggleFullscreen,
         e: () => setHostMode((v) => !v),
@@ -176,6 +177,8 @@ export default function App() {
             onRevealAll={game.revealAll}
             onHideAll={game.hideAll}
             onStrike={game.strike}
+            onSteal={game.steal}
+            stolen={Boolean(state.steal)}
             onSwitchTeam={game.switchTeam}
             soundOn={soundOn}
             onToggleSound={() => game.setSoundOn((v) => !v)}

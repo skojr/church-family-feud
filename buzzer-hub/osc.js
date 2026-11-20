@@ -360,7 +360,7 @@ export function oscStatus() {
 // e.g. /feud/reveal 3 "Good Health" 32  and  /feud/reveal/3.
 // Apps that can only match an exact address (QLab, Companion triggers) use the
 // second form; apps that read arguments (TouchDesigner, Resolume) use the first.
-const PER_VALUE = new Set(['reveal', 'hide', 'strike', 'round', 'buzz'])
+const PER_VALUE = new Set(['reveal', 'hide', 'strike', 'round', 'buzz', 'steal'])
 
 // Game events -> mapped-cue triggers.
 function gameTriggers(name, v) {

@@ -140,7 +140,7 @@ On the phone you can:
 
 - Tap a team to make it the answering team.
 - Tap an answer to reveal it on the projector (its votes go to the answering team). Tap it again to hide it.
-- Strike, Switch team, Reveal all, Hide all, Reset round, Sound on/off, and change rounds with the arrows.
+- Strike, Switch team, Steal, Reveal all, Hide all, Reset round, Sound on/off, and change rounds with the arrows.
 - Use **Edit votes & teams** to type in the Mentimeter results, team names, and team totals.
 
 Everything you do on either device shows up on the other straight away. The laptop's keyboard and mouse keep working too, so if the phone has a problem, just carry on from the laptop.

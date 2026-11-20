@@ -6,6 +6,7 @@ const SHORTCUTS = [
   ['H', 'Hide all answers'],
   ['R', 'Reset round (answers + strikes)'],
   ['X', 'Strike (wrong answer)'],
+  ['S', 'Steal: give this round’s points to the other team (again to undo)'],
   ['T', 'Switch which team is answering'],
   ['F', 'Toggle fullscreen'],
   ['E', 'Toggle host edit mode'],

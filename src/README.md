@@ -20,7 +20,7 @@ Each component is one visual piece of the screen. They receive data and callback
 | `Brand.jsx` | The "ICGC GATHERING EDITION" title with the orange "FAMILY FEUD" ribbon and the rotating light rays behind it. |
 | `AnswerCard.jsx` | One answer row on the board. The front shows the number badge and a panel labeled "ICGC: The Gathering". The back shows the answer text and its vote count. Clicking it flips between the two. |
 | `TeamPanel.jsx` | One team's column beside the board: a card with the name, total points, and "Answering" tag (clicking it makes that team the one answering), plus a "This round" card underneath with the points earned in the current round. |
-| `HostControls.jsx` | The row of buttons along the bottom (Prev, Reset, Hide All, Reveal All, Strike, Team, Next, Sound, Host Edit, Keys, Fullscreen). |
+| `HostControls.jsx` | The row of buttons along the bottom (Prev, Reset, Hide All, Reveal All, Strike, Steal, Team, Next, Sound, Host Edit, Keys, Fullscreen). |
 | `HostEditor.jsx` | The form for changing the question, answers, and vote counts for the current round, renaming teams, correcting team totals, or restoring the defaults. Shown as a slide-out panel in Host Edit mode on the laptop, or inline (`inline` prop) on the phone host page. |
 | `HostView.jsx` / `HostView.css` | The phone host page (`/?view=host`): a connection badge, round navigation, team selector, tap-to-reveal answer list with votes, strike and other controls, and an "Edit votes & teams" tab. |
 | `StrikeOverlay.jsx` | The big red ✕ marks that flash across the screen when the host adds a strike. |

@@ -1,5 +1,16 @@
 import { useState, useSyncExternalStore } from 'react'
-import { ChevronLeft, ChevronRight, Eye, EyeOff, RotateCcw, Volume2, VolumeX, X } from 'lucide-react'
+import {
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  EyeOff,
+  HandCoins,
+  RotateCcw,
+  Undo2,
+  Volume2,
+  VolumeX,
+  X,
+} from 'lucide-react'
 import { useGame } from '../hooks/useGame'
 import { isConnected, onConnectionChange, syncEnabled } from '../lib/sync'
 import HostEditor from './HostEditor'
@@ -126,6 +137,10 @@ export default function HostView() {
             </button>
             <button type="button" className="host__btn" onClick={game.switchTeam}>
               Switch team
+            </button>
+            <button type="button" className="host__btn" onClick={game.steal}>
+              {state.steal ? <Undo2 size={18} /> : <HandCoins size={18} />}{' '}
+              {state.steal ? 'Undo steal' : `Steal for ${game.teamName(game.stealTo)}`}
             </button>
             <button type="button" className="host__btn" onClick={game.revealAll}>
               <Eye size={18} /> Reveal all

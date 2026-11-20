@@ -394,6 +394,7 @@ values for apps that only match an exact address (QLab OSC triggers, simple Comp
 | Points total changed | `/feud/score` points | |
 | Strike count (on reconnect and round change) | `/feud/strikes` count | |
 | Answering team changed | `/feud/answering` team letter, team number | |
+| Steal (round's points moved) | `/feud/steal` team letter, team number | `/feud/steal/A` |
 | Team score changed | `/feud/team/A/score` points | |
 | Team name changed | `/feud/team/A/name` name | |
 | Buzzer: someone buzzed first | `/feud/buzz` station letter, station number | `/feud/buzz/A` |
@@ -403,7 +404,7 @@ values for apps that only match an exact address (QLab OSC triggers, simple Comp
 
 Single reveals, hides, strikes, the round, score and teams are sent by the **board window**, so
 they go out exactly once whichever device made the change (laptop keys or the phone host page).
-**Reveal all**, **hide all** and **reset** are sent by the window where the button was pressed;
+**Reveal all**, **hide all**, **reset** and **steal** are sent by the window where the button was pressed;
 reveal all and hide all are also followed by one `reveal`/`hide` per answer.
 
 Values are OSC int32 for numbers and strings for text.

@@ -18,7 +18,7 @@ A Family Feud–style game show board made for the ICGC church gathering. It run
 - When the host reveals an answer, the slot **flips over** with a chime and shows the answer and how many people voted for it. Those votes are added to the score of the team that is answering.
 - A **team card** on each side of the board shows that team's **total points**, with a smaller **This round** card underneath showing what the team has earned in the current round. The team that is currently answering glows and has an **Answering** tag.
 
-There are **10 rounds**, each with its own question.
+There are **9 rounds**, each with its own question.
 
 ### What the host does
 
@@ -28,6 +28,7 @@ The host runs the game from the laptop, using the mouse or the keyboard.
 - **Reveal an answer:** click its slot, or press its number (**1–6**). Answers can be revealed in any order. The answer's votes go to the team that is answering. Clicking a revealed answer hides it again and takes those points back.
 - **Reveal the next hidden answer:** press **Space**.
 - **Wrong answer:** press **X** (or click **Strike**) to flash a big red ✕ with a buzzer. Each round keeps track of up to 3 strikes, shown under the board.
+- **Steal:** after the third strike, let the other team answer. If they get it, reveal their answer and press **S** (or click **Steal**). Every point from that round moves to the stealing team, and they become the answering team. Pressing **S** again undoes the steal.
 - **Change rounds:** use the **← / →** arrow keys, the **Prev / Next** buttons, or click a numbered dot at the bottom left.
 - **Fullscreen:** press **F** or click **Fullscreen**. Press **F** or **Esc** to leave fullscreen.
 
@@ -44,6 +45,7 @@ The buttons along the bottom stay faded so they don't distract the audience. Mov
 | **H** | Hide all answers |
 | **R** | Reset the round (hides answers and clears strikes) |
 | **X** | Add a strike |
+| **S** | Steal: move this round's points to the other team (press again to undo) |
 | **T** | Switch which team is answering |
 | **F** | Fullscreen on/off |
 | **E** | Open/close Host Edit mode |
@@ -62,7 +64,7 @@ Votes are collected separately (for example with Mentimeter). To enter the resul
 Your changes **save automatically**. Refreshing the page or closing the browser won't lose them, as long as you use the **same browser on the same computer**.
 
 - **Restore this round** puts the current round back to its original questions and votes.
-- **Restore all defaults** does the same for all 10 rounds.
+- **Restore all defaults** does the same for all 9 rounds.
 
 The **Teams** section of the panel lets you rename each team and type in a team's total points if you need to correct it. **Reset team scores** sets both teams back to 0 for a new game.
 
