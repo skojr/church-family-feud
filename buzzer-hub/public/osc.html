@@ -1,0 +1,1119 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OSC Cues</title>
+    <link rel="stylesheet" href="/display.css" />
+    <style>
+      html,
+      body {
+        overflow: auto;
+        cursor: auto;
+        height: auto;
+        min-height: 100%;
+      }
+      body {
+        background:
+          radial-gradient(ellipse 60% 50% at 100% 0%, rgba(223, 60, 128, 0.22), transparent 60%),
+          radial-gradient(ellipse 60% 50% at 0% 100%, rgba(121, 2, 255, 0.28), transparent 65%),
+          var(--night);
+        background-attachment: fixed;
+      }
+      .wrap {
+        max-width: 1180px;
+        margin: 0 auto;
+        padding: 0 max(16px, 3vw) 64px;
+        display: grid;
+        gap: 22px;
+      }
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 5;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 12px;
+        padding: 18px 0 14px;
+        background: linear-gradient(var(--night) 75%, transparent);
+      }
+      h1 {
+        margin: 0 auto 0 0;
+        font: 400 clamp(34px, 5vw, 50px) / 1 var(--font-display);
+        text-transform: uppercase;
+        letter-spacing: 0.02em;
+      }
+      h1 span {
+        color: var(--coral);
+      }
+      h2 {
+        margin: 0;
+        font: 400 28px / 1 var(--font-display);
+        text-transform: uppercase;
+        letter-spacing: 0.03em;
+      }
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.08);
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        white-space: nowrap;
+      }
+      .dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: #ff5a5a;
+      }
+      .is-up .dot,
+      .is-saved .dot {
+        background: #3ddc84;
+      }
+      .is-saving .dot {
+        background: #ffc94d;
+      }
+      .label {
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: 0.22em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.62);
+      }
+      .note {
+        margin: 0;
+        font-size: 13px;
+        font-weight: 600;
+        line-height: 1.5;
+        color: rgba(255, 255, 255, 0.68);
+      }
+      code {
+        font: 600 0.92em ui-monospace, 'SF Mono', Menlo, monospace;
+        color: #ffd2cc;
+      }
+      .panel {
+        display: grid;
+        gap: 14px;
+        padding: 18px;
+        border-radius: 16px;
+        background: rgba(45, 17, 89, 0.62);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+      .panel__head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px 14px;
+      }
+      .panel__head h2 {
+        margin-right: auto;
+      }
+
+      /* Controls */
+      button {
+        padding: 9px 14px;
+        border-radius: 10px;
+        border: 1px solid rgba(200, 170, 255, 0.3);
+        background: rgba(121, 2, 255, 0.28);
+        color: #fff;
+        font: 800 13px var(--font-body);
+        letter-spacing: 0.04em;
+        cursor: pointer;
+        white-space: nowrap;
+        transition: background 0.15s, transform 0.1s;
+      }
+      button:hover {
+        background: rgba(121, 2, 255, 0.6);
+      }
+      button:active {
+        transform: translateY(1px);
+      }
+      button:focus-visible,
+      input:focus-visible,
+      select:focus-visible {
+        outline: 3px solid var(--coral);
+        outline-offset: 2px;
+      }
+      .btn-ghost {
+        background: transparent;
+        border-color: rgba(255, 255, 255, 0.18);
+      }
+      .btn-ghost:hover {
+        background: rgba(255, 255, 255, 0.1);
+      }
+      .btn-test {
+        background: rgba(255, 115, 99, 0.18);
+        border-color: rgba(255, 115, 99, 0.5);
+      }
+      .btn-test:hover {
+        background: rgba(255, 115, 99, 0.45);
+      }
+      .btn-x {
+        width: 36px;
+        padding: 9px 0;
+        background: transparent;
+        border-color: transparent;
+        color: rgba(255, 255, 255, 0.55);
+        font-size: 18px;
+        line-height: 1;
+      }
+      .btn-x:hover {
+        background: rgba(255, 90, 90, 0.2);
+        color: #fff;
+      }
+      input,
+      select {
+        min-width: 0;
+        padding: 9px 11px;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        background: rgba(10, 4, 24, 0.55);
+        color: #fff;
+        font: 600 14px var(--font-body);
+      }
+      input.mono {
+        font: 600 14px ui-monospace, 'SF Mono', Menlo, monospace;
+      }
+      input::placeholder {
+        color: rgba(255, 255, 255, 0.32);
+      }
+      input.is-bad {
+        border-color: #ff5a5a;
+      }
+      select {
+        appearance: none;
+        padding-right: 28px;
+        background-image: linear-gradient(45deg, transparent 50%, #fff 50%), linear-gradient(-45deg, transparent 50%, #fff 50%);
+        background-position: calc(100% - 15px) 55%, calc(100% - 10px) 55%;
+        background-size: 5px 5px;
+        background-repeat: no-repeat;
+      }
+      .switch {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 700;
+      }
+      .switch input {
+        position: absolute;
+        opacity: 0;
+        width: 1px;
+        height: 1px;
+      }
+      .switch i {
+        flex: none;
+        width: 40px;
+        height: 22px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.18);
+        position: relative;
+        transition: background 0.15s;
+      }
+      .switch i::after {
+        content: '';
+        position: absolute;
+        top: 3px;
+        left: 3px;
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        background: #fff;
+        transition: transform 0.15s;
+      }
+      .switch input:checked + i {
+        background: var(--coral);
+      }
+      .switch input:checked + i::after {
+        transform: translateX(18px);
+      }
+      .switch input:focus-visible + i {
+        outline: 3px solid var(--coral);
+        outline-offset: 2px;
+      }
+
+      /* Targets */
+      .targets {
+        display: grid;
+        gap: 8px;
+      }
+      .target {
+        display: grid;
+        grid-template-columns: auto minmax(120px, 1.2fr) minmax(130px, 1.2fr) 100px auto auto;
+        gap: 8px;
+        align-items: center;
+      }
+      .cols {
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.2em;
+        text-transform: uppercase;
+        color: rgba(255, 255, 255, 0.45);
+      }
+
+      /* Cues */
+      .toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+      .seg {
+        display: inline-flex;
+        padding: 3px;
+        border-radius: 12px;
+        background: rgba(10, 4, 24, 0.5);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+      }
+      .seg button {
+        border: 0;
+        background: transparent;
+        padding: 7px 12px;
+      }
+      .seg button[aria-pressed='true'] {
+        background: var(--violet-glow);
+      }
+      .group {
+        display: grid;
+        gap: 10px;
+      }
+      .group > .label {
+        padding: 6px 2px 0;
+      }
+      .trigger {
+        display: grid;
+        gap: 10px;
+        padding: 14px;
+        border-radius: 14px;
+        background: rgba(26, 11, 51, 0.7);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        transition: border-color 0.3s, box-shadow 0.3s;
+      }
+      .trigger.is-mapped {
+        border-color: rgba(200, 170, 255, 0.28);
+      }
+      .trigger.is-firing {
+        border-color: var(--coral);
+        box-shadow: 0 0 0 1px var(--coral), 0 0 28px rgba(255, 115, 99, 0.35);
+        transition: none;
+      }
+      .trigger__top {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px 10px;
+      }
+      .trigger__name {
+        font-size: 16px;
+        font-weight: 800;
+        margin-right: auto;
+      }
+      .badge {
+        padding: 3px 9px;
+        border-radius: 999px;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        background: rgba(255, 255, 255, 0.08);
+      }
+      .badge--sound {
+        background: rgba(255, 115, 99, 0.2);
+        color: #ffb3aa;
+      }
+      .badge--fired {
+        background: rgba(61, 220, 132, 0.16);
+        color: #9ff0c4;
+      }
+      .vars {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 6px;
+      }
+      .var {
+        padding: 3px 8px;
+        border-radius: 7px;
+        border: 1px dashed rgba(255, 255, 255, 0.25);
+        background: transparent;
+        font: 600 12px ui-monospace, 'SF Mono', Menlo, monospace;
+        color: #ffd2cc;
+      }
+      .var:hover {
+        background: rgba(255, 255, 255, 0.08);
+      }
+      .learn {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+      }
+      .addr-chip {
+        padding: 9px 12px;
+        border-radius: 10px;
+        background: rgba(10, 4, 24, 0.55);
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        font: 600 14px ui-monospace, 'SF Mono', Menlo, monospace;
+        user-select: all;
+        overflow-wrap: anywhere;
+      }
+      .btn-send {
+        padding: 10px 22px;
+        background: var(--coral);
+        border-color: var(--coral);
+        font-size: 14px;
+      }
+      .btn-send:hover {
+        background: var(--coral-deep);
+      }
+      .learn__msg {
+        font-size: 13px;
+        font-weight: 700;
+        color: #9ff0c4;
+      }
+      .learn__msg.is-error {
+        color: #ff9a9a;
+      }
+      .custom {
+        display: grid;
+        gap: 10px;
+        padding-top: 10px;
+        border-top: 1px dashed rgba(255, 255, 255, 0.12);
+      }
+      .custom[hidden],
+      .badge[hidden],
+      .result[hidden] {
+        display: none;
+      }
+      .learn .btn-ghost {
+        margin-left: auto;
+        font-size: 12px;
+        padding: 7px 12px;
+      }
+      .steps {
+        margin: 0;
+        padding-left: 22px;
+        display: grid;
+        gap: 6px;
+        font-size: 15px;
+        font-weight: 600;
+        line-height: 1.45;
+      }
+      .steps b {
+        color: var(--coral);
+      }
+      .maps {
+        display: grid;
+        gap: 8px;
+      }
+      .map {
+        display: grid;
+        grid-template-columns: auto minmax(120px, 0.8fr) minmax(180px, 1.6fr) minmax(140px, 1.2fr) auto auto;
+        gap: 8px;
+        align-items: center;
+      }
+      .map.is-off input,
+      .map.is-off select {
+        opacity: 0.45;
+      }
+      .result {
+        grid-column: 2 / -1;
+        margin: -2px 0 2px;
+        font: 600 12px ui-monospace, 'SF Mono', Menlo, monospace;
+        color: #9ff0c4;
+        overflow-wrap: anywhere;
+      }
+      .result.is-error {
+        color: #ff9a9a;
+        font-family: var(--font-body);
+      }
+      .empty {
+        font-size: 13px;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.4);
+      }
+
+      /* Examples + log */
+      .two {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 22px;
+        align-items: start;
+      }
+      .examples {
+        display: grid;
+        gap: 8px;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      .examples li {
+        display: grid;
+        gap: 3px;
+        padding: 10px 12px;
+        border-radius: 10px;
+        background: rgba(255, 255, 255, 0.05);
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .examples b {
+        font-weight: 800;
+      }
+      .log {
+        display: grid;
+        gap: 4px;
+        max-height: 420px;
+        overflow: auto;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+      }
+      .log li {
+        display: grid;
+        grid-template-columns: 70px 1fr;
+        gap: 2px 10px;
+        padding: 7px 10px;
+        border-radius: 8px;
+        background: rgba(255, 255, 255, 0.04);
+        font: 600 12px ui-monospace, 'SF Mono', Menlo, monospace;
+      }
+      .log li.is-new {
+        animation: flash 1.2s ease-out;
+      }
+      @keyframes flash {
+        from {
+          background: rgba(255, 115, 99, 0.35);
+        }
+      }
+      .log time {
+        color: rgba(255, 255, 255, 0.45);
+      }
+      .log .addr {
+        color: #fff;
+        overflow-wrap: anywhere;
+      }
+      .log .meta {
+        grid-column: 2;
+        font-family: var(--font-body);
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.5);
+      }
+      .log .k-mapped .addr,
+      .log .k-moment .addr,
+      .log .k-learn .addr {
+        color: #ffd2cc;
+      }
+
+      @media (max-width: 820px) {
+        .map {
+          grid-template-columns: auto 1fr auto auto;
+        }
+        .map .f-target {
+          grid-column: 2 / -1;
+        }
+        .map .f-address,
+        .map .f-args {
+          grid-column: 1 / -1;
+        }
+        .map .btn-test {
+          grid-column: 1 / span 3;
+        }
+        .result {
+          grid-column: 1 / -1;
+        }
+        .target {
+          grid-template-columns: auto 1fr 80px auto auto;
+        }
+        .target .f-name {
+          grid-column: 2 / -1;
+        }
+        .target .f-host {
+          grid-column: 1 / span 2;
+        }
+        .cols {
+          display: none;
+        }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          transition: none !important;
+          animation: none !important;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <header>
+        <h1>OSC <span>Cues</span></h1>
+        <span class="chip" id="save"><i class="dot"></i><span>Loading…</span></span>
+        <span class="chip" id="hub"><i class="dot"></i><span>Hub offline</span></span>
+      </header>
+
+      <section class="panel" aria-labelledby="t-head">
+        <div class="panel__head">
+          <h2 id="t-head">Send to</h2>
+          <label class="switch"><input type="checkbox" id="enabled" /><i></i>OSC on</label>
+          <button type="button" class="btn-ghost" id="add-target">+ Add computer</button>
+        </div>
+        <div class="targets" id="targets"></div>
+        <p class="note">
+          The IP of each computer that should receive cues, and the port its app listens on. Use
+          <code>127.0.0.1</code> for an app on this computer. Common ports: QLab 53000, Resolume 7000,
+          Companion 12321, ETC Eos 8000 (set in the desk's network settings).
+        </p>
+      </section>
+
+      <section class="panel" aria-labelledby="c-head">
+        <div class="panel__head">
+          <h2 id="c-head">Cues</h2>
+          <div class="toolbar">
+            <div class="seg" role="group" aria-label="Show">
+              <button type="button" data-filter="sound" aria-pressed="true">🔊 Sound moments</button>
+              <button type="button" data-filter="mapped" aria-pressed="false">Typed</button>
+              <button type="button" data-filter="all" aria-pressed="false">All</button>
+            </div>
+          </div>
+        </div>
+        <ol class="steps">
+          <li>In your lighting program, put the OSC input in <b>learn</b> mode for the button or cue you want.</li>
+          <li>Press <b>Send</b> next to the moment below. The program picks up that address.</li>
+          <li>Done. During the game the same message goes out every time that moment happens.</li>
+        </ol>
+        <p class="note" id="value-note"></p>
+        <div id="cues"></div>
+      </section>
+
+      <div class="two">
+        <section class="panel" aria-labelledby="e-head">
+          <h2 id="e-head">Settings</h2>
+          <label class="switch"><input type="checkbox" id="moments" /><i></i>Send the moment cues</label>
+          <div class="target" style="grid-template-columns: auto 1fr">
+            <span class="label">Value</span>
+            <select id="momentValue" aria-label="Value sent with each moment cue">
+              <option value="press">Button press: 1.0, then 0.0 (most lighting apps)</option>
+              <option value="one">Just 1.0</option>
+              <option value="none">No value</option>
+            </select>
+          </div>
+          <div class="target" style="grid-template-columns: auto 1fr">
+            <span class="label">Prefix</span>
+            <input class="mono" id="prefix" placeholder="/feud" aria-label="Address prefix" />
+          </div>
+          <p class="note">
+            If your program learns the address but doesn't react during the game, try <b>Just 1.0</b>. Changing
+            the prefix changes every address, so learn them again afterwards.
+          </p>
+          <div class="panel__head">
+            <span class="label" style="margin-right: auto">Typing an address instead</span>
+          </div>
+          <p class="note">
+            If a program needs a specific address (it doesn't learn), use <b>+ Type an address</b> on a moment.
+            Values: <code>1</code> whole number, <code>1.0</code> decimal, <code>true</code>/<code>false</code>,
+            <code>'quoted text'</code>. Click a <code>{placeholder}</code> to put in the live value.
+          </p>
+          <ul class="examples">
+            <li><b>ETC Eos / Ion: fire a cue</b><span>Address <code>/eos/cue/1/5/fire</code> · no values</span></li>
+            <li>
+              <b>ETC Eos: different cue per answer slot</b
+              ><span>Address <code>/eos/cue/2/{slot}/fire</code> on “Correct answer revealed”</span>
+            </li>
+            <li>
+              <b>grandMA3: run a command</b
+              ><span>Address <code>/gma3/cmd</code> · values <code>'Go+ Sequence 5'</code></span>
+            </li>
+            <li><b>QLab: start a cue</b><span>Address <code>/cue/STRIKE/start</code> · no values</span></li>
+            <li>
+              <b>Companion: press a button</b
+              ><span>Address <code>/location/1/0/3/press</code> · no values</span>
+            </li>
+          </ul>
+          <p class="note">Desks differ: check your desk's OSC manual for its exact addresses.</p>
+          <div class="panel__head">
+            <span class="label" style="margin-right: auto">Built-in cues</span>
+          </div>
+          <label class="switch"
+            ><input type="checkbox" id="builtIn" /><i></i>Also send every event on the built-in addresses</label
+          >
+          <p class="note">
+            Built-in cues (<code>/feud/strike/2</code>, <code>/feud/buzz/A</code> …) carry values for apps like
+            Companion and TouchDesigner, and are listed in the buzzer-hub README. Turn them off if you only use the
+            moment cues, so nothing else arrives while a program is learning.
+          </p>
+        </section>
+
+        <section class="panel" aria-labelledby="l-head">
+          <div class="panel__head">
+            <h2 id="l-head">Sent</h2>
+            <label class="switch"><input type="checkbox" id="mapped-only" /><i></i>Hide built-in</label>
+          </div>
+          <ul class="log" id="log"></ul>
+          <p class="empty" id="log-empty">Nothing sent yet. Press Test on a cue, or play the game.</p>
+        </section>
+      </div>
+    </div>
+
+    <script type="module">
+      import { connectHub } from './hub-client.js'
+
+      const $ = (s) => document.querySelector(s)
+      const el = (tag, props = {}, ...kids) => {
+        const n = Object.assign(document.createElement(tag), props)
+        n.append(...kids.filter((k) => k !== null && k !== undefined))
+        return n
+      }
+
+      let cfg = null
+      let triggers = []
+      let filter = 'sound'
+      let log = []
+      const lastFired = {}
+      let lastFocused = null
+
+      // ---------------------------------------------------------- saving --
+      let saveTimer
+      let saving = false
+      let pending = false
+      function setSave(state, text) {
+        const chip = $('#save')
+        chip.className = `chip is-${state}`
+        chip.querySelector('span').textContent = text
+      }
+      function queueSave() {
+        setSave('saving', 'Saving…')
+        clearTimeout(saveTimer)
+        saveTimer = setTimeout(save, 500)
+      }
+      async function save() {
+        if (saving) {
+          pending = true
+          return
+        }
+        saving = true
+        try {
+          const r = await fetch('/api/osc/config', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(cfg),
+          })
+          const body = await r.json()
+          if (!body.ok) throw new Error(body.error || 'Save failed')
+          setSave('saved', 'Saved')
+        } catch (err) {
+          setSave('error', `Not saved: ${err.message}`)
+        } finally {
+          saving = false
+          if (pending) {
+            pending = false
+            save()
+          }
+        }
+      }
+
+      // ---------------------------------------------------------- helpers --
+      const BAD = /[\s#*,?[\]]/
+      const addressOk = (a) => !a.trim() || !BAD.test(a.replace(/\{\w+\}/g, '').trim())
+      const toggle = (checked, onChange, label) => {
+        const input = el('input', { type: 'checkbox', checked })
+        input.setAttribute('aria-label', label)
+        input.addEventListener('change', () => onChange(input.checked))
+        return el('label', { className: 'switch' }, input, el('i'))
+      }
+      const targetOptions = (value) => {
+        const sel = el('select', { className: 'f-target' })
+        sel.setAttribute('aria-label', 'Send to')
+        sel.append(el('option', { value: '*', textContent: 'All computers' }))
+        for (const t of cfg.targets) sel.append(el('option', { value: t.name, textContent: t.name }))
+        if (value !== '*' && !cfg.targets.some((t) => t.name === value)) {
+          sel.append(el('option', { value, textContent: `${value} (missing)` }))
+        }
+        sel.value = value
+        return sel
+      }
+      const fmtArg = (a) => (typeof a === 'string' ? `'${a}'` : String(a))
+      const ago = (t) => {
+        const s = Math.round((Date.now() - t) / 1000)
+        return s < 60 ? `${s}s ago` : s < 3600 ? `${Math.round(s / 60)} min ago` : 'earlier'
+      }
+
+      // ---------------------------------------------------------- targets --
+      function renderTargets() {
+        $('#enabled').checked = cfg.enabled
+        $('#moments').checked = cfg.moments
+        $('#momentValue').value = cfg.momentValue
+        $('#builtIn').checked = cfg.builtIn
+        renderValueNote()
+        $('#prefix').value = cfg.prefix
+        const box = $('#targets')
+        box.innerHTML = ''
+        if (!cfg.targets.length) {
+          box.append(el('p', { className: 'empty', textContent: 'No computers yet. Add the lighting computer.' }))
+          return
+        }
+        box.append(
+          el(
+            'div',
+            { className: 'target cols' },
+            el('span', { textContent: 'On' }),
+            el('span', { textContent: 'Name' }),
+            el('span', { textContent: 'IP address' }),
+            el('span', { textContent: 'Port' }),
+          ),
+        )
+        cfg.targets.forEach((t, i) => {
+          const name = el('input', { className: 'f-name', value: t.name, placeholder: 'Lighting desk' })
+          name.setAttribute('aria-label', 'Name')
+          name.addEventListener('change', () => {
+            const old = t.name
+            const next = name.value.trim() || `Target ${i + 1}`
+            if (cfg.targets.some((o, j) => j !== i && o.name === next)) {
+              name.value = old
+              return
+            }
+            t.name = next
+            for (const c of cfg.cues) if (c.target === old) c.target = next
+            renderCues()
+            queueSave()
+          })
+          const host = el('input', { className: 'f-host mono', value: t.host, placeholder: '192.168.1.50' })
+          host.setAttribute('aria-label', 'IP address')
+          host.addEventListener('input', () => {
+            t.host = host.value.trim()
+            if (t.host) queueSave()
+          })
+          const port = el('input', { className: 'mono', value: t.port, inputMode: 'numeric', placeholder: '8000' })
+          port.setAttribute('aria-label', 'Port')
+          port.addEventListener('input', () => {
+            const n = Number(port.value)
+            port.classList.toggle('is-bad', !(n > 0 && n < 65536))
+            if (n > 0 && n < 65536) {
+              t.port = Math.trunc(n)
+              queueSave()
+            }
+          })
+          const test = el('button', { type: 'button', className: 'btn-test', textContent: 'Test' })
+          test.addEventListener('click', async () => {
+            await save()
+            const r = await post('/api/osc/test-target', { index: i })
+            flashButton(test, r.ok ? 'Sent' : 'Failed')
+          })
+          const del = el('button', { type: 'button', className: 'btn-x', textContent: '×', title: 'Remove' })
+          del.setAttribute('aria-label', `Remove ${t.name}`)
+          del.addEventListener('click', () => {
+            if (!confirm(`Remove ${t.name}?`)) return
+            cfg.targets.splice(i, 1)
+            renderAll()
+            queueSave()
+          })
+          box.append(
+            el(
+              'div',
+              { className: 'target' },
+              toggle(t.enabled, (v) => ((t.enabled = v), queueSave()), `Send to ${t.name}`),
+              name,
+              host,
+              port,
+              test,
+              del,
+            ),
+          )
+        })
+      }
+      $('#add-target').addEventListener('click', () => {
+        let n = cfg.targets.length + 1
+        while (cfg.targets.some((t) => t.name === `Lighting ${n}`)) n++
+        cfg.targets.push({ name: cfg.targets.length ? `Lighting ${n}` : 'Lighting desk', host: '', port: 8000, enabled: true })
+        renderAll()
+        $('#targets .target:last-child .f-host')?.focus()
+      })
+      $('#enabled').addEventListener('change', (e) => ((cfg.enabled = e.target.checked), queueSave()))
+      $('#moments').addEventListener('change', (e) => ((cfg.moments = e.target.checked), renderCues(), queueSave()))
+      $('#momentValue').addEventListener('change', (e) => ((cfg.momentValue = e.target.value), renderValueNote(), queueSave()))
+      function renderValueNote() {
+        const v = { press: 'a button press (1.0, then 0.0)', one: 'the value 1.0', none: 'no value' }[cfg.momentValue]
+        $('#value-note').textContent = cfg.moments
+          ? `Each moment has its own address and is sent with ${v}. Change this under Settings.`
+          : 'Moment cues are switched off under Settings, so Send only works for learning; nothing goes out during the game.'
+      }
+      $('#builtIn').addEventListener('change', (e) => ((cfg.builtIn = e.target.checked), queueSave()))
+      $('#prefix').addEventListener('change', (e) => {
+        cfg.prefix = '/' + (e.target.value.trim() || '/feud').replace(/^\/+|\/+$/g, '')
+        e.target.value = cfg.prefix
+        renderCues()
+        queueSave()
+      })
+
+      // ------------------------------------------------------------- cues --
+      function renderCues() {
+        const box = $('#cues')
+        box.innerHTML = ''
+        const groups = new Map()
+        for (const tr of triggers) {
+          const maps = cfg.cues.filter((c) => c.trigger === tr.id)
+          if (filter === 'sound' && !tr.sound) continue
+          if (filter === 'mapped' && !maps.length) continue
+          if (!groups.has(tr.group)) groups.set(tr.group, [])
+          groups.get(tr.group).push(tr)
+        }
+        if (!groups.size) {
+          box.append(el('p', { className: 'empty', textContent: 'No mapped cues yet. Switch to “All” or “Sound moments” to add one.' }))
+          return
+        }
+        for (const [name, list] of groups) {
+          const g = el('div', { className: 'group' }, el('span', { className: 'label', textContent: name }))
+          for (const tr of list) g.append(renderTrigger(tr))
+          box.append(g)
+        }
+      }
+
+      function renderTrigger(tr) {
+        const maps = cfg.cues.filter((c) => c.trigger === tr.id)
+        const card = el('article', { className: `trigger${maps.length ? ' is-mapped' : ''}` })
+        card.dataset.trigger = tr.id
+        const fired = el('span', { className: 'badge badge--fired', hidden: !lastFired[tr.id] })
+        if (lastFired[tr.id]) fired.textContent = `Fired ${ago(lastFired[tr.id])}`
+        const add = el('button', { type: 'button', className: 'btn-ghost', textContent: '+ Type an address' })
+        add.addEventListener('click', () => {
+          cfg.cues.push({ trigger: tr.id, target: '*', address: '', args: '', note: '', enabled: true })
+          renderCues()
+          const cards = [...document.querySelectorAll(`[data-trigger="${tr.id}"] .f-address`)]
+          cards.at(-1)?.focus()
+        })
+        card.append(
+          el(
+            'div',
+            { className: 'trigger__top' },
+            el('span', { className: 'trigger__name', textContent: tr.label }),
+            tr.sound ? el('span', { className: 'badge badge--sound', textContent: '🔊 Sound' }) : null,
+            fired,
+          ),
+        )
+
+        const addr = `${cfg.prefix === '/' ? '' : cfg.prefix}/cue/${tr.id}`
+        const msg = el('span', { className: 'learn__msg', role: 'status' })
+        const send = el('button', { type: 'button', className: 'btn-send', textContent: 'Send ▶' })
+        send.setAttribute('aria-label', `Send ${addr} (${tr.label})`)
+        send.addEventListener('click', async () => {
+          await save()
+          const r = await post('/api/osc/send-moment', { trigger: tr.id })
+          msg.classList.toggle('is-error', !r.ok)
+          msg.textContent = r.ok ? 'Sent ✓' : r.error
+          clearTimeout(msg._t)
+          if (r.ok) msg._t = setTimeout(() => (msg.textContent = ''), 2500)
+        })
+        card.append(el('div', { className: 'learn' }, el('code', { className: 'addr-chip', textContent: addr }), send, msg, add))
+
+        const custom = el('div', { className: 'custom', hidden: !maps.length })
+        const customHead = el('div', { className: 'trigger__top' }, el('span', { className: 'label', textContent: 'Typed addresses' }))
+        custom.append(customHead)
+        card.append(custom)
+        if (tr.vars.length) {
+          const vars = el('div', { className: 'vars' }, el('span', { className: 'label', textContent: 'Live values' }))
+          for (const v of tr.vars) {
+            const chip = el('button', { type: 'button', className: 'var', textContent: `{${v}}` })
+            chip.title = `Insert {${v}}`
+            chip.addEventListener('mousedown', (e) => e.preventDefault()) // keep focus in the field
+            chip.addEventListener('click', () => insertVar(card, `{${v}}`))
+            vars.append(chip)
+          }
+          custom.append(vars)
+        }
+        const box = el('div', { className: 'maps' })
+        for (const cue of maps) box.append(renderMap(cue))
+        custom.append(box)
+        return card
+      }
+
+      function renderMap(cue) {
+        const row = el('div', { className: `map${cue.enabled ? '' : ' is-off'}` })
+        const target = targetOptions(cue.target)
+        target.addEventListener('change', () => ((cue.target = target.value), queueSave()))
+        const address = el('input', {
+          className: 'f-address mono',
+          value: cue.address,
+          placeholder: '/eos/cue/1/5/fire',
+        })
+        address.setAttribute('aria-label', 'OSC address')
+        address.addEventListener('input', () => {
+          cue.address = address.value
+          address.classList.toggle('is-bad', !addressOk(address.value))
+          if (addressOk(address.value)) queueSave()
+        })
+        const args = el('input', { className: 'f-args mono', value: cue.args, placeholder: 'values (optional)' })
+        args.setAttribute('aria-label', 'Values')
+        args.addEventListener('input', () => ((cue.args = args.value), queueSave()))
+        for (const f of [address, args]) f.addEventListener('focus', () => (lastFocused = f))
+        const result = el('div', { className: 'result', hidden: true })
+        const test = el('button', { type: 'button', className: 'btn-test', textContent: 'Test' })
+        test.addEventListener('click', async () => {
+          await save()
+          const r = await post('/api/osc/test-cue', cue)
+          result.hidden = false
+          result.classList.toggle('is-error', !r.ok)
+          result.textContent = r.ok
+            ? `Sent ${r.address}${r.args.length ? ' ' + r.args.map(fmtArg).join(' ') : ''} (with sample values)`
+            : r.error
+        })
+        const del = el('button', { type: 'button', className: 'btn-x', textContent: '×', title: 'Remove' })
+        del.setAttribute('aria-label', 'Remove this OSC message')
+        del.addEventListener('click', () => {
+          cfg.cues.splice(cfg.cues.indexOf(cue), 1)
+          renderCues()
+          queueSave()
+        })
+        row.append(
+          toggle(
+            cue.enabled,
+            (v) => {
+              cue.enabled = v
+              row.classList.toggle('is-off', !v)
+              queueSave()
+            },
+            'Cue on',
+          ),
+          target,
+          address,
+          args,
+          test,
+          del,
+          result,
+        )
+        return row
+      }
+
+      function insertVar(card, text) {
+        let field = lastFocused && card.contains(lastFocused) ? lastFocused : card.querySelector('.f-address')
+        if (!field) return
+        const start = field.selectionStart ?? field.value.length
+        const end = field.selectionEnd ?? start
+        field.value = field.value.slice(0, start) + text + field.value.slice(end)
+        field.focus()
+        field.setSelectionRange(start + text.length, start + text.length)
+        field.dispatchEvent(new Event('input'))
+      }
+
+      document.querySelectorAll('[data-filter]').forEach((b) =>
+        b.addEventListener('click', () => {
+          filter = b.dataset.filter
+          document.querySelectorAll('[data-filter]').forEach((o) => o.setAttribute('aria-pressed', String(o === b)))
+          renderCues()
+        }),
+      )
+
+      // -------------------------------------------------------------- log --
+      function renderLog() {
+        const mappedOnly = $('#mapped-only').checked
+        const items = log.filter((e) => !mappedOnly || e.kind !== 'built-in').slice(0, 40)
+        $('#log-empty').hidden = items.length > 0
+        $('#log').replaceChildren(...items.map((e) => logItem(e, false)))
+      }
+      function logItem(e, isNew) {
+        const tr = triggers.find((t) => t.id === e.trigger)
+        const kind =
+          e.kind === 'mapped' || e.kind === 'moment'
+            ? tr?.label || 'Cue'
+            : e.kind === 'learn'
+              ? `Send (learn): ${tr?.label || ''}`
+              : e.kind === 'test'
+                ? 'Test'
+                : 'Built-in'
+        return el(
+          'li',
+          { className: `k-${e.kind}${isNew ? ' is-new' : ''}` },
+          el('time', { textContent: new Date(e.t).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }) }),
+          el('span', { className: 'addr', textContent: `${e.address}${e.args.length ? ' ' + e.args.map(fmtArg).join(' ') : ''}` }),
+          el('span', { className: 'meta', textContent: `${kind} → ${e.to.join(', ')}` }),
+        )
+      }
+      $('#mapped-only').addEventListener('change', renderLog)
+
+      function onSent(e) {
+        log.unshift(e)
+        log.length = Math.min(log.length, 60)
+        if (!$('#mapped-only').checked || e.kind !== 'built-in') {
+          $('#log').prepend(logItem(e, true))
+          while ($('#log').children.length > 40) $('#log').lastElementChild.remove()
+          $('#log-empty').hidden = true
+        }
+        if ((e.kind === 'mapped' || e.kind === 'moment') && e.trigger) {
+          lastFired[e.trigger] = e.t
+          const card = document.querySelector(`[data-trigger="${e.trigger}"]`)
+          if (card) {
+            const badge = card.querySelector('.badge--fired')
+            badge.hidden = false
+            badge.textContent = 'Fired just now'
+            card.classList.add('is-firing')
+            clearTimeout(card._t)
+            card._t = setTimeout(() => card.classList.remove('is-firing'), 700)
+          }
+        }
+      }
+
+      // ------------------------------------------------------------- misc --
+      async function post(url, body) {
+        try {
+          const r = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) })
+          return await r.json()
+        } catch (err) {
+          return { ok: false, error: `Hub not reachable (${err.message})` }
+        }
+      }
+      function flashButton(b, text) {
+        const old = b.textContent
+        b.textContent = text
+        setTimeout(() => (b.textContent = old), 1200)
+      }
+      function renderAll() {
+        renderTargets()
+        renderCues()
+      }
+
+      async function load() {
+        const r = await fetch('/api/osc/config')
+        const body = await r.json()
+        triggers = body.triggers
+        log = body.log || []
+        for (const e of log) if ((e.kind === 'mapped' || e.kind === 'moment') && e.trigger && !lastFired[e.trigger]) lastFired[e.trigger] = e.t
+        cfg = {
+          enabled: body.enabled,
+          prefix: body.prefix || '/feud',
+          moments: body.moments,
+          momentValue: body.momentValue || 'press',
+          builtIn: body.builtIn,
+          targets: body.targets,
+          cues: body.cues,
+        }
+        setSave('saved', 'Saved')
+        renderAll()
+        renderLog()
+      }
+
+      connectHub({
+        hello: { type: 'hello', role: 'osc' },
+        onStatus: (up) => {
+          $('#hub').classList.toggle('is-up', up)
+          $('#hub span').textContent = up ? 'Hub connected' : 'Hub offline'
+          if (up && !cfg) load().catch(() => setSave('error', 'Could not load settings'))
+        },
+        onMessage: (msg) => {
+          if (msg.type === 'osc' && msg.entry && cfg) onSent(msg.entry)
+        },
+      })
+      setInterval(() => {
+        for (const card of document.querySelectorAll('.trigger')) {
+          const t = lastFired[card.dataset.trigger]
+          const badge = card.querySelector('.badge--fired')
+          if (t && badge && !card.classList.contains('is-firing')) badge.textContent = `Fired ${ago(t)}`
+        }
+      }, 15000)
+    </script>
+  </body>
+</html>

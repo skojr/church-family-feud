@@ -12,12 +12,29 @@ import { readFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { WebSocketServer } from 'ws'
 import { Bonjour } from 'bonjour-service'
-import { oscStatus, sendGameEvent, sendOsc } from './osc.js'
+import {
+  fireCue,
+  getOscConfig,
+  onOscSent,
+  oscLog,
+  oscStatus,
+  saveOscConfig,
+  sendGameEvent,
+  sendMomentNow,
+  sendOsc,
+  testCue,
+  testTarget,
+  TRIGGERS,
+} from './osc.js'
 
 const PORT = Number(process.env.PORT) || 8090
 const STATION_IDS = ['A', 'B']
 const PUBLIC_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), 'public')
-const HEARTBEAT_MS = 2000 // ping every 2 s; a station missing 2 pongs is marked offline
+const HEARTBEAT_MS = 2000 // ping every 2 s
+// A station is marked offline after this many pings in a row go unanswered
+// (about 10 s). Generous on purpose: on busy church Wi-Fi a buzzer can go quiet
+// for a few seconds and come back, and flickering offline/online helps no one.
+const MAX_MISSED_PINGS = 5
 
 // ---------------------------------------------------------------- state ----
 
@@ -85,13 +102,19 @@ function updateTeamsFromGame(msg) {
       team.score = score
       changed = true
       sendOsc(`team/${id}/score`, score)
+      fireCue('teamScore', { team: id, teamNumber: i + 1, teamName: team.name, score })
     }
   })
   const nextAnswering = STATION_IDS[msg.answering] ?? null
   if (nextAnswering !== answering) {
     answering = nextAnswering
     changed = true
-    if (answering) sendOsc('answering', answering, STATION_IDS.indexOf(answering) + 1)
+    if (answering) {
+      const vars = { team: answering, teamNumber: STATION_IDS.indexOf(answering) + 1, teamName: teams[answering].name }
+      sendOsc('answering', answering, vars.teamNumber)
+      fireCue('answering', vars)
+      fireCue(`answering${answering}`, vars)
+    }
   }
   if (changed) {
     saveTeams()
@@ -234,7 +257,14 @@ function decide() {
     'win',
   )
   broadcastScreens({ type: 'buzz', station: win.station, round: game.round })
-  sendGameEvent('buzz', [win.station, STATION_IDS.indexOf(win.station) + 1])
+  const buzzVars = {
+    team: win.station,
+    teamNumber: STATION_IDS.indexOf(win.station) + 1,
+    teamName: teams[win.station]?.name ?? win.station,
+  }
+  sendGameEvent('buzz', [win.station, buzzVars.teamNumber])
+  fireCue('buzz', buzzVars)
+  fireCue(`buzz${win.station}`, buzzVars)
   broadcastState()
 }
 
@@ -252,6 +282,7 @@ function reset() {
   game.armedAt = now()
   logEvent(`Round ${game.round} armed`)
   sendOsc('buzzer/armed')
+  fireCue('armed')
   broadcastState()
 }
 
@@ -262,6 +293,7 @@ function lock() {
   game.armed = false
   logEvent('Buzzers locked by host')
   sendOsc('buzzer/locked')
+  fireCue('locked')
   broadcastState()
 }
 
@@ -285,9 +317,11 @@ function identify(id) {
 
 wss.on('connection', (ws, req) => {
   ws.role = 'screen'
-  ws.alive = true
+  ws.missed = 0
   ws.ip = (req.socket.remoteAddress || '').replace('::ffff:', '')
-  ws.on('pong', () => (ws.alive = true))
+  // Any sign of life counts, not just pongs.
+  ws.on('pong', () => (ws.missed = 0))
+  ws.on('message', () => (ws.missed = 0))
 
   send(ws, snapshot())
 
@@ -361,7 +395,7 @@ wss.on('connection', (ws, req) => {
         break
       case 'game':
         // Events from the Family Feud game, passed on as OSC.
-        sendGameEvent(msg.event, msg.args)
+        sendGameEvent(msg.event, msg.args, { sync: msg.sync === true })
         if (msg.event === 'score' && Number.isFinite(msg.args?.[0])) board.score = msg.args[0]
         if (msg.event === 'round' && Number.isFinite(msg.args?.[0])) {
           board.round = msg.args[0]
@@ -390,11 +424,11 @@ wss.on('connection', (ws, req) => {
 // Drop stations that stop answering pings (power pulled, Wi-Fi gone).
 setInterval(() => {
   for (const ws of wss.clients) {
-    if (!ws.alive) {
+    if (ws.missed >= MAX_MISSED_PINGS) {
       ws.terminate()
       continue
     }
-    ws.alive = false
+    ws.missed++
     ws.ping()
   }
 }, HEARTBEAT_MS)
@@ -410,6 +444,24 @@ const TYPES = {
   '.woff2': 'font/woff2',
 }
 
+function readBody(req, limit = 200_000) {
+  return new Promise((resolve, reject) => {
+    let data = ''
+    req.on('data', (chunk) => {
+      data += chunk
+      if (data.length > limit) {
+        reject(new Error('Too large'))
+        req.destroy()
+      }
+    })
+    req.on('end', () => resolve(data))
+    req.on('error', reject)
+  })
+}
+
+// Show what was sent on the /osc page as it happens.
+onOscSent((entry) => broadcastScreens({ type: 'osc', entry }))
+
 const server = http.createServer(async (req, res) => {
   const url = new URL(req.url, 'http://hub')
 
@@ -417,15 +469,32 @@ const server = http.createServer(async (req, res) => {
   if (url.pathname.startsWith('/api/')) {
     res.setHeader('Access-Control-Allow-Origin', '*')
     const action = url.pathname.slice(5)
+    const json = (code, body) => res.writeHead(code, { 'Content-Type': 'application/json' }).end(JSON.stringify(body))
     if (action === 'reset') reset()
     else if (action === 'lock') lock()
-    else if (action === 'osc') {
-      res.writeHead(200, { 'Content-Type': 'application/json' }).end(JSON.stringify(oscStatus()))
-      return
-    } else if (action === 'osc/test') {
+    else if (action === 'osc') return json(200, oscStatus())
+    else if (action === 'osc/test') {
       sendOsc('test', 1)
-      res.writeHead(200, { 'Content-Type': 'application/json' }).end(JSON.stringify({ sent: true, ...oscStatus() }))
-      return
+      return json(200, { sent: true, ...oscStatus() })
+    } else if (action === 'osc/config' && req.method === 'GET') {
+      return json(200, { ...getOscConfig(), triggers: TRIGGERS, log: oscLog() })
+    } else if (action.startsWith('osc/') && req.method === 'POST') {
+      // The /osc page: save settings, test a cue, test a target.
+      let body
+      try {
+        body = JSON.parse((await readBody(req)) || '{}')
+      } catch {
+        return json(400, { ok: false, error: 'Bad JSON' })
+      }
+      try {
+        if (action === 'osc/config') return json(200, { ok: true, ...saveOscConfig(body) })
+        if (action === 'osc/test-cue') return json(200, testCue(body))
+        if (action === 'osc/send-moment') return json(200, sendMomentNow(String(body.trigger)))
+        if (action === 'osc/test-target') return json(200, testTarget(Number(body.index)))
+      } catch (err) {
+        return json(500, { ok: false, error: err.message })
+      }
+      return json(404, { ok: false, error: 'unknown action' })
     } else if (action !== 'state') {
       res.writeHead(404).end('{"error":"unknown action"}')
       return
@@ -440,6 +509,7 @@ const server = http.createServer(async (req, res) => {
     '/banner': 'banner.html',
     '/small': 'small.html',
     '/control': 'control.html',
+    '/osc': 'osc.html',
   }
   const file = routes[url.pathname] || url.pathname.slice(1)
   const full = path.join(PUBLIC_DIR, path.normalize(file))
@@ -466,6 +536,7 @@ server.listen(PORT, '0.0.0.0', () => {
   console.log(`  Bell screen   http://localhost:${PORT}`)
   console.log(`  Simulator     http://localhost:${PORT}/sim`)
   console.log(`  Control       http://localhost:${PORT}/control   (LED screens and buzzers)`)
+  console.log(`  OSC cues      http://localhost:${PORT}/osc       (map cues for lighting, QLab…)`)
   console.log(`  LED banner    http://localhost:${PORT}/banner`)
   console.log(`  LED small     http://localhost:${PORT}/small`)
   for (const ip of ips) console.log(`  On network    http://${ip}:${PORT}   (stations find this automatically)`)

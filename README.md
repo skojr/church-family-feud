@@ -129,6 +129,7 @@ On the laptop itself, use `localhost`. From any other device on the same network
 | **Host view** | http://localhost:5173/?view=host | `http://<laptop-ip>:5173/?view=host` | The host's phone: answers, votes, team names, strikes. From a phone, the game must be started with `npm run host`. |
 | **Buzzer hub** | http://localhost:8090 | `http://<laptop-ip>:8090` | Buzzer status, reset/lock, links to everything below. |
 | **LED control** | http://localhost:8090/control | `http://<laptop-ip>:8090/control` | Team scores and buzzer state at a glance, buzzer reset/lock, LED links. |
+| **OSC cues** | http://localhost:8090/osc | `http://<laptop-ip>:8090/osc` | Teach the lighting program each moment (buzz, reveal, strike…): put it in learn mode and press Send. |
 | **LED banner** | http://localhost:8090/banner | `http://<laptop-ip>:8090/banner` | Long LED banner: team names and total points. |
 | **LED small** | http://localhost:8090/small | `http://<laptop-ip>:8090/small` | Small LED screen: both teams' points and who buzzed first. |
 | **LED small, Team 1 only** | http://localhost:8090/small?team=A | `http://<laptop-ip>:8090/small?team=A` | One team's podium screen. |

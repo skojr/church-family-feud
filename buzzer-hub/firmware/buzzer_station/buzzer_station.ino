@@ -21,7 +21,7 @@
 #include <Preferences.h>
 #include <WebSocketsClient.h>
 
-#define FW_VERSION "1.3"
+#define FW_VERSION "1.4"
 
 // Pins (DevKit V1 labels D27 / D26).
 #define BUTTON_PIN 27  // arcade switch; the other switch pin goes to GND
@@ -299,7 +299,7 @@ void maintainHub() {
   ws.begin(hubHost.c_str(), hubPort, "/ws");
   ws.onEvent(onWs);
   ws.setReconnectInterval(1000);
-  ws.enableHeartbeat(5000, 2000, 2);  // drop and reconnect if the hub stops answering
+  ws.enableHeartbeat(5000, 4000, 3);  // drop and reconnect if the hub stops answering (~25 s; slow Wi-Fi is tolerated)
   wsStarted = true;
   hubLostSince = millis();
 }

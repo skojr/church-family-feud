@@ -163,7 +163,7 @@ press.
    screen shows "Online · IP · dBm".
 4. Press `1` on the bell screen. Station A's light blinks 6 times.
 5. Repeat for B, then race the two real buttons.
-6. Pull a station's power. Within about 4 seconds it shows **Offline** on the bell screen.
+6. Pull a station's power. Within about 10 seconds it shows **Offline** on the bell screen.
 
 ---
 
@@ -302,7 +302,44 @@ Game (browser) ──ws──► Hub ──OSC/UDP──► QLab / Resolume / Co
 Buzzer stations ──ws──┘
 ```
 
-### Set the target
+### Teach your lighting program the cues (easiest)
+Open `http://localhost:8090/osc` (or the **OSC cues** button on the bell screen). From the
+lighting computer, use the hub's **On network** address.
+
+1. Under **Send to**, add the lighting computer's IP and the port its OSC input listens on.
+2. In the lighting program, put the OSC input in **learn** mode for the button or cue you want.
+3. On the page, press **Send ▶** next to the moment. The program learns that address.
+
+Every moment has its own fixed address under `/feud/cue/`, and the same message goes out during
+the game every time that moment happens:
+
+| Moment | Address |
+|---|---|
+| Someone buzzed in / Team 1 / Team 2 | `/feud/cue/buzz`, `/feud/cue/buzzA`, `/feud/cue/buzzB` |
+| Buzzers reset & armed / locked | `/feud/cue/armed`, `/feud/cue/locked` |
+| Correct answer revealed (any) / answer 1–8 | `/feud/cue/reveal`, `/feud/cue/reveal1` … `/feud/cue/reveal8` |
+| Answer hidden / reveal all / hide all | `/feud/cue/hide`, `/feud/cue/revealall`, `/feud/cue/hideall` |
+| Any strike / 1st / 2nd / 3rd | `/feud/cue/strike`, `/feud/cue/strike1`, `/feud/cue/strike2`, `/feud/cue/strike3` |
+| Round changed / round reset / board points changed | `/feud/cue/round`, `/feud/cue/reset`, `/feud/cue/score` |
+| Answering team changed / Team 1 / Team 2 | `/feud/cue/answering`, `/feud/cue/answeringA`, `/feud/cue/answeringB` |
+| A team score changed | `/feud/cue/teamScore` |
+
+- By default each one is sent as a button press: float `1.0`, then `0.0` 150 ms later. Under
+  **Settings** it can be just `1.0`, or no value.
+- The page lists the sound-effect moments first (buzz-ins, correct answers, strikes). **All**
+  shows the rest.
+- **Sent** shows every message as it goes out, and each moment glows when it fires.
+- Moment cues never fire just because the game reconnects to the hub; only real moments do.
+- Turn off **Built-in cues** under Settings if you only use the moment cues, so nothing else
+  arrives while the program is learning.
+
+**Programs that don't learn:** press **+ Type an address** on a moment and type the exact address
+and values the program expects. Values: `1` whole number, `1.0` decimal, `true`/`false`,
+`'quoted text'`. Placeholders put in the live value: `{slot}`, `{votes}`, `{text}`, `{strikes}`,
+`{team}`, `{teamNumber}`, `{teamName}`, `{round}`, `{points}`, `{score}`, for example
+`/eos/cue/2/{slot}/fire`. **Test** sends it with sample values.
+
+### Or edit the file
 The first time the hub starts, it creates `buzzer-hub/osc.config.json`. Open it and put in the
 IP and port of the app that should receive the cues:
 

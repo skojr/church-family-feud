@@ -1,7 +1,11 @@
 {
   "enabled": true,
   "prefix": "/feud",
+  "moments": true,
+  "momentValue": "press",
+  "builtIn": true,
   "targets": [
     { "name": "Show computer", "host": "127.0.0.1", "port": 53000, "enabled": true }
-  ]
+  ],
+  "cues": []
 }

@@ -194,7 +194,14 @@ If Resolume runs on a different computer, open the pages there using the laptop'
 
 ### 4. Optional: OSC cues
 
-To fire cues in QLab, Resolume, Companion or a lighting desk, put the receiving app's IP and port in `buzzer-hub/osc.config.json` (the hub creates it the first time it starts) and save. Open http://localhost:8090/api/osc/test to send a test message. The full list of cues is in [buzzer-hub/README.md](buzzer-hub/README.md#osc-output-cues-for-other-apps).
+To fire cues on a lighting desk, QLab, Resolume or Companion, open http://localhost:8090/osc (or the **OSC cues** button on the hub page). It can also be opened from the lighting computer at the laptop's **On network** address, for example `http://192.168.1.169:8090/osc`.
+
+1. Under **Send to**, add the lighting computer: its IP and the port its OSC input listens on.
+2. In the lighting program, put the OSC input in **learn** mode for the button or cue you want.
+3. On the page, press **Send ▶** next to the moment (for example **3rd strike**). The program learns it. Repeat for each moment. The ones with sound effects are listed first.
+4. That's it: during the game the same message goes out each time that moment happens. Changes save by themselves, and the **Sent** list shows every message as it goes out.
+
+The settings live in `buzzer-hub/osc.config.json`. It isn't saved in git, so **copy that file across** if the hub moves to another computer, and check the IPs in it.
 
 ### Order on the day
 

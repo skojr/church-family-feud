@@ -248,6 +248,13 @@
         <p class="note">Add <code>?bg=black</code> to any screen for a pure black background (for keying).</p>
       </section>
 
+      <section class="panel" aria-label="OSC cues">
+        <span class="label">OSC cues</span>
+        <div class="links">
+          <a href="/osc" target="_blank" rel="noopener">Map cues to lighting, QLab, Companion<small id="osc-link"></small></a>
+        </div>
+      </section>
+
       <p class="note">
         Team names and scores come from the game. Change them in the game's host page
         (<code>/?view=host</code> on the game, Edit votes &amp; teams tab) or in Host Edit on the board. The LED
@@ -337,6 +344,7 @@
         }
       }
 
+      $('#osc-link').textContent = `${location.origin}/osc`
       $('#arm').addEventListener('click', () => hub.send({ type: 'reset' }))
       $('#lock').addEventListener('click', () => hub.send({ type: 'lock' }))
 

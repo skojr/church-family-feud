@@ -34,9 +34,12 @@ export function useHubLink(game) {
 
   const sendAll = () => {
     const c = live.current
-    emit('round', c.round, c.question)
-    emit('score', c.boardScore)
-    emit('strikes', c.strikes)
+    // Marked as catch-up: the hub passes these on as built-in OSC so other apps
+    // know where the game is, but never fires mapped (lighting) cues for them.
+    const sync = (event, ...args) => sendToHub({ type: 'game', event, args, sync: true })
+    sync('round', c.round, c.question)
+    sync('score', c.boardScore)
+    sync('strikes', c.strikes)
     sendToHub({ type: 'teams', teams: c.teams, answering: c.activeTeam })
   }
 
