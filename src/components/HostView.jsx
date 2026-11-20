@@ -5,6 +5,7 @@ import {
   Eye,
   EyeOff,
   HandCoins,
+  QrCode,
   RotateCcw,
   Undo2,
   Volume2,
@@ -150,6 +151,14 @@ export default function HostView() {
             </button>
             <button type="button" className="host__btn" onClick={game.resetRound}>
               <RotateCcw size={18} /> Reset round
+            </button>
+            <button
+              type="button"
+              className={`host__btn ${game.rulesShown ? 'is-on' : ''}`}
+              onClick={() => game.setRulesShown((v) => !v)}
+              aria-pressed={game.rulesShown}
+            >
+              <QrCode size={18} /> {game.rulesShown ? 'Hide rules' : 'Show rules'}
             </button>
             <button type="button" className="host__btn" onClick={() => game.setSoundOn((v) => !v)}>
               {soundOn ? <Volume2 size={18} /> : <VolumeX size={18} />} Sound {soundOn ? 'on' : 'off'}

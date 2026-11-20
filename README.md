@@ -29,6 +29,7 @@ The host runs the game from the laptop, using the mouse or the keyboard.
 - **Reveal the next hidden answer:** press **Space**.
 - **Wrong answer:** press **X** (or click **Strike**) to flash a big red ✕ with a buzzer. Each round keeps track of up to 3 strikes, shown under the board.
 - **Steal:** after the third strike, let the other team answer. If they get it, reveal their answer and press **S** (or click **Steal**). Every point from that round moves to the stealing team, and they become the answering team. Pressing **S** again undoes the steal.
+- **Rules and voting QR code:** press **Q** (or click **Rules**) to cover the board with a "How to play" screen that goes over the rules and shows the Menti QR code. Press **Q** or **Esc**, or click anywhere, to go back to the board. The phone host page has a button for it too. To change the QR code, replace `public/menti-qr-code.png`.
 - **Change rounds:** use the **← / →** arrow keys, the **Prev / Next** buttons, or click a numbered dot at the bottom left.
 - **Fullscreen:** press **F** or click **Fullscreen**. Press **F** or **Esc** to leave fullscreen.
 
@@ -47,6 +48,7 @@ The buttons along the bottom stay faded so they don't distract the audience. Mov
 | **X** | Add a strike |
 | **S** | Steal: move this round's points to the other team (press again to undo) |
 | **T** | Switch which team is answering |
+| **Q** | Show/hide the "How to play" screen with the voting QR code |
 | **F** | Fullscreen on/off |
 | **E** | Open/close Host Edit mode |
 | **M** | Sound on/off |

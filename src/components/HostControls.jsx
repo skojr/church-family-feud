@@ -9,6 +9,7 @@ import {
   Maximize,
   Minimize,
   Pencil,
+  QrCode,
   RotateCcw,
   Undo2,
   Volume2,
@@ -43,6 +44,7 @@ export default function HostControls({
   onSteal,
   stolen,
   onSwitchTeam,
+  onShowRules,
   soundOn,
   onToggleSound,
   hostMode,
@@ -75,6 +77,7 @@ export default function HostControls({
           onClick={onToggleSound}
           hint="M"
         />
+        <Btn icon={QrCode} label="Rules" onClick={onShowRules} hint="Q" />
         <Btn icon={Pencil} label="Host Edit" onClick={onToggleHost} active={hostMode} hint="E" />
         <Btn icon={Keyboard} label="Keys" onClick={onToggleHelp} hint="?" />
         <Btn

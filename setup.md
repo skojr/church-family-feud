@@ -140,6 +140,7 @@ On the phone you can:
 
 - Tap a team to make it the answering team.
 - Tap an answer to reveal it on the projector (its votes go to the answering team). Tap it again to hide it.
+- Show rules (covers the projector with the rules and the voting QR code; tap again to hide it).
 - Strike, Switch team, Steal, Reveal all, Hide all, Reset round, Sound on/off, and change rounds with the arrows.
 - Use **Edit votes & teams** to type in the Mentimeter results, team names, and team totals.
 

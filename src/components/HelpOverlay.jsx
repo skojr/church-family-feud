@@ -8,6 +8,7 @@ const SHORTCUTS = [
   ['X', 'Strike (wrong answer)'],
   ['S', 'Steal: give this round’s points to the other team (again to undo)'],
   ['T', 'Switch which team is answering'],
+  ['Q', 'Show / hide the rules screen with the voting QR code'],
   ['F', 'Toggle fullscreen'],
   ['E', 'Toggle host edit mode'],
   ['M', 'Mute / unmute sound'],

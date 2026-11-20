@@ -53,6 +53,8 @@ export function useGame() {
   // takes from). `steal.previous` is the award map before the steal, so it can be undone.
   const [roundState, setRoundState] = useLocalStorage('igc-feud:state', {}, isPlainObject)
   const [soundOn, setSoundOn] = useLocalStorage('igc-feud:sound', true)
+  // The "How to play" screen (rules + voting QR code) covering the board on the projector.
+  const [rulesShown, setRulesShown] = useLocalStorage('igc-feud:rules', false)
   // `bonus` holds manual adjustments from Host Edit on top of the points earned from reveals.
   const [teams, setTeams] = useLocalStorage('igc-feud:teams', defaultTeams, isValidTeams)
   const [activeTeam, setActiveTeam] = useLocalStorage('igc-feud:active-team', 0, isTeamIndex)
@@ -211,6 +213,8 @@ export function useGame() {
     activeTeam,
     soundOn,
     setSoundOn,
+    rulesShown: rulesShown === true,
+    setRulesShown,
     setActiveTeam,
     reveal,
     hide,

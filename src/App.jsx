@@ -9,6 +9,7 @@ import HostControls from './components/HostControls'
 import HostEditor from './components/HostEditor'
 import HelpOverlay from './components/HelpOverlay'
 import StrikeOverlay from './components/StrikeOverlay'
+import RulesScreen from './components/RulesScreen'
 import TeamPanel from './components/TeamPanel'
 import './App.css'
 
@@ -61,6 +62,7 @@ export default function App() {
         r: game.resetRound,
         a: game.revealAll,
         h: game.hideAll,
+        q: () => game.setRulesShown((v) => !v),
         x: game.strike,
         s: game.steal,
         t: game.switchTeam,
@@ -71,6 +73,7 @@ export default function App() {
         Escape: () => {
           setShowHelp(false)
           setHostMode(false)
+          game.setRulesShown(false)
         },
       }
       const action = actions[key]
@@ -180,6 +183,7 @@ export default function App() {
             onSteal={game.steal}
             stolen={Boolean(state.steal)}
             onSwitchTeam={game.switchTeam}
+            onShowRules={() => game.setRulesShown(true)}
             soundOn={soundOn}
             onToggleSound={() => game.setSoundOn((v) => !v)}
             hostMode={hostMode}
@@ -192,6 +196,10 @@ export default function App() {
       </main>
 
       {strikeFlash > 0 && <StrikeOverlay key={strikeFlash} count={Math.max(state.strikes, 1)} />}
+
+      {game.rulesShown && (
+        <RulesScreen roundCount={rounds.length} onClose={() => game.setRulesShown(false)} />
+      )}
 
       {hostMode && <HostEditor game={game} onClose={() => setHostMode(false)} />}
 

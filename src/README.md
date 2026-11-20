@@ -23,6 +23,7 @@ Each component is one visual piece of the screen. They receive data and callback
 | `HostControls.jsx` | The row of buttons along the bottom (Prev, Reset, Hide All, Reveal All, Strike, Steal, Team, Next, Sound, Host Edit, Keys, Fullscreen). |
 | `HostEditor.jsx` | The form for changing the question, answers, and vote counts for the current round, renaming teams, correcting team totals, or restoring the defaults. Shown as a slide-out panel in Host Edit mode on the laptop, or inline (`inline` prop) on the phone host page. |
 | `HostView.jsx` / `HostView.css` | The phone host page (`/?view=host`): a connection badge, round navigation, team selector, tap-to-reveal answer list with votes, strike and other controls, and an "Edit votes & teams" tab. |
+| `RulesScreen.jsx` | The audience-facing "How to play" screen: the rules in five steps and the Menti voting QR code (`public/menti-qr-code.png`). Covers the board while `rulesShown` is on (**Q** on the board, or the button on the phone host page). |
 | `StrikeOverlay.jsx` | The big red ✕ marks that flash across the screen when the host adds a strike. |
 | `HelpOverlay.jsx` | The pop-up list of keyboard shortcuts (opened with `?`). |
 
