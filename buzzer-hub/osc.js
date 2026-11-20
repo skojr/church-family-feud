@@ -60,6 +60,9 @@ export const TRIGGERS = [
   { id: 'strike1', group: 'Strikes', label: '1st strike', sound: true, vars: ['strikes'] },
   { id: 'strike2', group: 'Strikes', label: '2nd strike', sound: true, vars: ['strikes'] },
   { id: 'strike3', group: 'Strikes', label: '3rd strike (out)', sound: true, vars: ['strikes'] },
+  { id: 'steal', group: 'Strikes', label: 'Steal (round points move to the other team)', vars: ['team', 'teamNumber'] },
+  { id: 'stealA', group: 'Strikes', label: 'Team 1 stole the round', vars: ['team', 'teamNumber'] },
+  { id: 'stealB', group: 'Strikes', label: 'Team 2 stole the round', vars: ['team', 'teamNumber'] },
   { id: 'round', group: 'Rounds', label: 'Round changed', vars: ['round', 'question'] },
   { id: 'reset', group: 'Rounds', label: 'Round reset', vars: [] },
   { id: 'score', group: 'Rounds', label: 'Board points changed', vars: ['points'] },
@@ -377,6 +380,11 @@ function gameTriggers(name, v) {
         ['strike', { strikes: v[0] }],
         [`strike${Math.min(3, Math.max(1, Number(v[0]) || 1))}`, { strikes: v[0] }],
       ]
+    case 'steal': {
+      const team = v[0] === 'B' ? 'B' : 'A'
+      const vars = { team, teamNumber: v[1] ?? (team === 'A' ? 1 : 2) }
+      return [['steal', vars], [`steal${team}`, vars]]
+    }
     case 'revealall':
     case 'hideall':
     case 'reset':

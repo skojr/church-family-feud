@@ -320,6 +320,7 @@ the game every time that moment happens:
 | Correct answer revealed (any) / answer 1–8 | `/feud/cue/reveal`, `/feud/cue/reveal1` … `/feud/cue/reveal8` |
 | Answer hidden / reveal all / hide all | `/feud/cue/hide`, `/feud/cue/revealall`, `/feud/cue/hideall` |
 | Any strike / 1st / 2nd / 3rd | `/feud/cue/strike`, `/feud/cue/strike1`, `/feud/cue/strike2`, `/feud/cue/strike3` |
+| Steal (any) / Team 1 stole / Team 2 stole | `/feud/cue/steal`, `/feud/cue/stealA`, `/feud/cue/stealB` |
 | Round changed / round reset / board points changed | `/feud/cue/round`, `/feud/cue/reset`, `/feud/cue/score` |
 | Answering team changed / Team 1 / Team 2 | `/feud/cue/answering`, `/feud/cue/answeringA`, `/feud/cue/answeringB` |
 | A team score changed | `/feud/cue/teamScore` |
